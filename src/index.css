@@ -88,8 +88,10 @@ html, body, #root {
   background: transparent !important;
 }
 
-/* Custom Leaflet Tooltip Styles for La Merida */
-.la-merida-tooltip {
+/* Custom Leaflet Tooltip Styles for La Merida, El Rocio, and La Zacara */
+.la-merida-tooltip,
+.el-rocio-tooltip,
+.la-zacara-tooltip {
   background: #FFFEF7 !important;
   border: 1.5px solid #BF9861 !important; /* Premium gold border */
   border-radius: 16px !important;
@@ -104,20 +106,30 @@ html, body, #root {
 }
 
 /* Tooltip pointer tip arrow styling to override Leaflet default black/solid */
-.la-merida-tooltip::before {
+.la-merida-tooltip::before,
+.el-rocio-tooltip::before,
+.la-zacara-tooltip::before {
   border-top-color: #BF9861 !important;
 }
 
-.leaflet-tooltip-top.la-merida-tooltip::before {
+.leaflet-tooltip-top.la-merida-tooltip::before,
+.leaflet-tooltip-top.el-rocio-tooltip::before,
+.leaflet-tooltip-top.la-zacara-tooltip::before {
   border-top-color: #BF9861 !important;
 }
-.leaflet-tooltip-bottom.la-merida-tooltip::before {
+.leaflet-tooltip-bottom.la-merida-tooltip::before,
+.leaflet-tooltip-bottom.el-rocio-tooltip::before,
+.leaflet-tooltip-bottom.la-zacara-tooltip::before {
   border-bottom-color: #BF9861 !important;
 }
-.leaflet-tooltip-left.la-merida-tooltip::before {
+.leaflet-tooltip-left.la-merida-tooltip::before,
+.leaflet-tooltip-left.el-rocio-tooltip::before,
+.leaflet-tooltip-left.la-zacara-tooltip::before {
   border-left-color: #BF9861 !important;
 }
-.leaflet-tooltip-right.la-merida-tooltip::before {
+.leaflet-tooltip-right.la-merida-tooltip::before,
+.leaflet-tooltip-right.el-rocio-tooltip::before,
+.leaflet-tooltip-right.la-zacara-tooltip::before {
   border-right-color: #BF9861 !important;
 }
 

@@ -119,8 +119,8 @@ const CUSTOM_POIS: CustomPOI[] = [
     category: 'f&b'
   },
   {
-    id: 'poi-kafi-lebanese',
-    name: 'Kafi - Lebanese Cafe',
+    id: 'poi-kefi-lebanese',
+    name: 'Kefi - Lebanese Cafe',
     coordinate: [15.591179, 73.770987],
     category: 'f&b'
   },
@@ -354,6 +354,62 @@ export default function MapContainer({
       sticky: true,
       opacity: 1.0,
       className: 'el-rocio-tooltip',
+      offset: L.point(0, -28)
+    });
+
+    // 1.5c. Persistent Vianaar "La Zacara" Property Pin & Hover tooltip
+    const laZacaraIconHtml = `
+      <div class="la-zacara-pin-inner vianaar-map-pin-inner" style="
+        position: relative;
+        width: 24px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0px 3px 6px rgba(35, 77, 59, 0.35));
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-origin: 12px 28px;
+      ">
+        <svg width="100%" height="100%" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+          <path d="M16 40C25 28 28 23 28 16C28 9.37 22.63 4 16 4C9.37 4 4 9.37 4 16C4 23 7 28 16 40Z" fill="#234D3B" stroke="#FFFEF7" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.5" fill="#FFFEF7" />
+        </svg>
+      </div>
+    `;
+
+    const laZacaraIcon = L.divIcon({
+      className: 'la-zacara-pin-wrapper',
+      html: laZacaraIconHtml,
+      iconSize: [24, 30],
+      iconAnchor: [12, 28]
+    });
+
+    const laZacaraCoords: [number, number] = [15.588538, 73.782272];
+    const laZacaraMarker = L.marker(laZacaraCoords, { icon: laZacaraIcon }).addTo(map);
+
+    const laZacaraTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          LA ZACARA
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROPERTY
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          modern contemporary cluster of villas
+        </div>
+      </div>
+    `;
+
+    laZacaraMarker.bindTooltip(laZacaraTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'la-zacara-tooltip',
       offset: L.point(0, -28)
     });
 
