@@ -19,40 +19,23 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<string>('Overview');
 
   // Ground position for site plan overlay config
-  const DEFAULT_LAT = 15.58885;
-  const DEFAULT_LNG = 73.78605;
+  const DEFAULT_LAT = 15.588768;
+  const DEFAULT_LNG = 73.786116;
 
   const [overlayConfig, setOverlayConfig] = useState<OverlayConfig>({
     lat: DEFAULT_LAT,
     lng: DEFAULT_LNG,
-    scale: 0.87,
-    widthScale: 1.2999999999999998,
-    heightScale: 1.0,
-    rotation: -3,
-    opacity: 1.0,
+    scale: 0.9749,
+    widthScale: 1.3000,
+    heightScale: 1.0000,
+    rotation: -2.75,
+    opacity: 1.00,
     visible: true
   });
 
   // ─── REFS FOR MAP ACCESS ───
   const mapRef = useRef<L.Map | null>(null);
   const overlayRef = useRef<L.ImageOverlay | null>(null);
-
-  // ─── TOOL ACTIONS ───
-  const handleResetAlignment = () => {
-    setOverlayConfig({
-      lat: DEFAULT_LAT,
-      lng: DEFAULT_LNG,
-      scale: 0.87,
-      widthScale: 1.2999999999999998,
-      heightScale: 1.0,
-      rotation: -3,
-      opacity: 1.0,
-      visible: true
-    });
-    if (mapRef.current) {
-      mapRef.current.setView([DEFAULT_LAT, DEFAULT_LNG], 17, { animate: true });
-    }
-  };
 
   const handleFlyToUnit = (unit: Unit) => {
     setSelectedUnit(unit);
@@ -81,10 +64,6 @@ export default function App() {
                 Verla Canca, North Goa
               </span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Fullscreen button removed as requested */}
           </div>
         </header>
 

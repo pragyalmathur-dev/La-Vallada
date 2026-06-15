@@ -274,7 +274,7 @@ export default function MapContainer({
       iconAnchor: [12, 28]
     });
 
-    const laMeridaCoords: [number, number] = [15.589611, 73.786444];
+    const laMeridaCoords: [number, number] = [15.589443, 73.786497];
     const laMeridaMarker = L.marker(laMeridaCoords, { icon: laMeridaIcon }).addTo(map);
 
     const laMeridaTooltipHtml = `
