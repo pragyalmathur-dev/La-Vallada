@@ -1,0 +1,6 @@
+{
+  "name": "La Vallada - Vianaar Goa",
+  "description": "Interactive property platfrom and maps with real-time property status and developer layout tools for La Vallada in Verla Canca, Goa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

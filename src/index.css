@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Mulish:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cardo", Georgia, serif;
+  --font-sans: "Mulish", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-vianaar-green: #234D3B;
+  --color-vianaar-medium: #FFFEF7;
+  --color-vianaar-sage: #257057;
+  --color-vianaar-gold: #BF9861;
+  --color-vianaar-soft: #AA783B;
+  --color-vianaar-cream: #302F2C;
+}
+
+/* Base resets & adjustments */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #FFFEF7;
+  color: #302F2C;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FFFEF7;
+}
+::-webkit-scrollbar-thumb {
+  background: #E3D5C9;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BF9861;
+}
+
+/* Smooth leaflet transitions and filters */
+.leaflet-container {
+  background: #FFFEF7 !important;
+  font-family: "Mulish", sans-serif !important;
+}
+
+/* Subtle map styling for architectural/street maps */
+.map-tile-osm .leaflet-tile-container,
+.map-tile-topo .leaflet-tile-container {
+  filter: sepia(0.12) contrast(1.02) brightness(0.97) saturate(0.85);
+}
+
+/* Darker tone for satellite */
+.map-tile-satellite .leaflet-tile-container {
+  filter: brightness(0.9) contrast(1.05) saturate(0.9);
+}
+
+/* Custom Leaflet Popup Styles */
+.leaflet-popup-content-wrapper {
+  background: #FFFEF7 !important;
+  border: 1px solid #E3D5C9 !important;
+  box-shadow: 0 10px 30px rgba(35, 77, 59, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  color: #302F2C !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background: #FFFEF7 !important;
+  border: 1px solid #E3D5C9 !important;
+}
+
+.leaflet-popup-close-button {
+  color: #BF9861 !important;
+  font-size: 16px !important;
+  padding: 6px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #234D3B !important;
+  background: transparent !important;
+}
+
+/* Custom Leaflet Tooltip Styles for La Merida */
+.la-merida-tooltip {
+  background: #FFFEF7 !important;
+  border: 1.5px solid #BF9861 !important; /* Premium gold border */
+  border-radius: 16px !important;
+  box-shadow: 0 10px 25px -5px rgba(35, 77, 59, 0.15), 0 8px 10px -6px rgba(35, 77, 59, 0.1) !important;
+  padding: 12px 18px !important;
+  color: #234D3B !important;
+  font-family: "Mulish", "Inter", sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  pointer-events: none !important;
+}
+
+/* Tooltip pointer tip arrow styling to override Leaflet default black/solid */
+.la-merida-tooltip::before {
+  border-top-color: #BF9861 !important;
+}
+
+.leaflet-tooltip-top.la-merida-tooltip::before {
+  border-top-color: #BF9861 !important;
+}
+.leaflet-tooltip-bottom.la-merida-tooltip::before {
+  border-bottom-color: #BF9861 !important;
+}
+.leaflet-tooltip-left.la-merida-tooltip::before {
+  border-left-color: #BF9861 !important;
+}
+.leaflet-tooltip-right.la-merida-tooltip::before {
+  border-right-color: #BF9861 !important;
+}
+
+/* Custom POI Transparent Tooltips */
+.custom-poi-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+.custom-poi-tooltip::before {
+  display: none !important;
+}
+
+
