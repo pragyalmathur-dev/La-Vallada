@@ -101,6 +101,12 @@ const CUSTOM_POIS: CustomPOI[] = [
     category: 'education'
   },
   {
+    id: 'poi-assagao-union',
+    name: 'Assagao Union High School',
+    coordinate: [15.596416, 73.779135],
+    category: 'education'
+  },
+  {
     id: 'poi-eds-goan-pub',
     name: "Ed's - The Goan Pub",
     coordinate: [15.582503, 73.782369],
@@ -128,6 +134,24 @@ const CUSTOM_POIS: CustomPOI[] = [
     id: 'poi-diavola-art-cafe',
     name: 'Diavola - Art Cafe & Pizzeria.',
     coordinate: [15.587767, 73.760001],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-cafe-cotinga',
+    name: 'Cafe Cotinga',
+    coordinate: [15.588541, 73.764563],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-babka-bakery',
+    name: 'Babka - Bakery, Goa',
+    coordinate: [15.587786, 73.762422],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-la-cucina',
+    name: 'La Cucina - Italian Restaurant',
+    coordinate: [15.589938, 73.765522],
     category: 'f&b'
   }
 ];
@@ -277,6 +301,62 @@ export default function MapContainer({
       offset: L.point(0, -28)
     });
 
+    // 1.5b. Persistent Vianaar "El Rocio" Property Pin & Hover tooltip
+    const elRocioIconHtml = `
+      <div class="el-rocio-pin-inner vianaar-map-pin-inner" style="
+        position: relative;
+        width: 24px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0px 3px 6px rgba(35, 77, 59, 0.35));
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-origin: 12px 28px;
+      ">
+        <svg width="100%" height="100%" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+          <path d="M16 40C25 28 28 23 28 16C28 9.37 22.63 4 16 4C9.37 4 4 9.37 4 16C4 23 7 28 16 40Z" fill="#234D3B" stroke="#FFFEF7" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.5" fill="#FFFEF7" />
+        </svg>
+      </div>
+    `;
+
+    const elRocioIcon = L.divIcon({
+      className: 'el-rocio-pin-wrapper',
+      html: elRocioIconHtml,
+      iconSize: [24, 30],
+      iconAnchor: [12, 28]
+    });
+
+    const elRocioCoords: [number, number] = [15.593123, 73.775048];
+    const elRocioMarker = L.marker(elRocioCoords, { icon: elRocioIcon }).addTo(map);
+
+    const elRocioTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          EL ROCIO
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROPERTY
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          premium design apartments
+        </div>
+      </div>
+    `;
+
+    elRocioMarker.bindTooltip(elRocioTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'el-rocio-tooltip',
+      offset: L.point(0, -28)
+    });
+
     // 1.6. Naikawado Rd. Curved Polyline (Solid White Line)
     const roadCoordinates: [number, number][] = [
       [15.589402, 73.785265],
@@ -300,7 +380,26 @@ export default function MapContainer({
       [15.584512, 73.777137],
       [15.584386, 73.777389],
       [15.584291, 73.777408],
-      [15.583677, 73.777159]
+      [15.583677, 73.777159],
+      [15.583610, 73.777161],
+      [15.583565, 73.777362],
+      [15.583564, 73.777687],
+      [15.583614, 73.778123],
+      [15.583621, 73.778191],
+      [15.583613, 73.778284],
+      [15.583371, 73.779192],
+      [15.583366, 73.779478],
+      [15.582705, 73.780883],
+      [15.582431, 73.781605],
+      [15.582403, 73.781878],
+      [15.582378, 73.782242],
+      [15.581393, 73.786749],
+      [15.581209, 73.788424],
+      [15.580763, 73.793748],
+      [15.580531, 73.796348],
+      [15.580396, 73.797448],
+      [15.580642, 73.798532],
+      [15.580646, 73.799236]
     ];
 
     // Casing (outline) for high visibility on satellite map
@@ -362,7 +461,7 @@ export default function MapContainer({
 
     // 1.6c. Third Road Curved Polyline (Solid White Line)
     const thirdRoadCoordinates: [number, number][] = [
-      [15.583649, 73.777146],
+      [15.583610, 73.777161],
       [15.583987, 73.776326],
       [15.584679, 73.775459],
       [15.585620, 73.773499],
@@ -371,7 +470,7 @@ export default function MapContainer({
       [15.588997, 73.771204],
       [15.589764, 73.770485],
       [15.590343, 73.769822],
-      [15.590531, 73.769720]
+      [15.590682, 73.769720]
     ];
 
     // Casing (outline) for third road
@@ -385,6 +484,67 @@ export default function MapContainer({
 
     // Crisp white road overlay for third road
     L.polyline(thirdRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6ca. Anjuna – Mapusa Rd. Curved Polyline (Solid White Line)
+    const anjunaMapusaRoadCoordinates: [number, number][] = [
+      [15.597623, 73.782292],
+      [15.597706, 73.781445],
+      [15.597541, 73.780909],
+      [15.596570, 73.779675],
+      [15.596156, 73.779203],
+      [15.595246, 73.778612],
+      [15.594706, 73.777997],
+      [15.594658, 73.777906],
+      [15.593646, 73.777053],
+      [15.593277, 73.776768],
+      [15.592167, 73.774258],
+      [15.591904, 73.773754],
+      [15.590764, 73.769954],
+      [15.590472, 73.769123],
+      [15.590347, 73.768124],
+      [15.590252, 73.767812],
+      [15.590297, 73.766921],
+      [15.590292, 73.766826],
+      [15.589999, 73.765412],
+      [15.590011, 73.764547],
+      [15.589896, 73.764515],
+      [15.589526, 73.764571],
+      [15.589398, 73.764468],
+      [15.588477, 73.764490],
+      [15.588429, 73.764447],
+      [15.587721, 73.761914],
+      [15.587684, 73.760293],
+      [15.587699, 73.760201],
+      [15.587439, 73.758794],
+      [15.587256, 73.758401],
+      [15.587009, 73.757296],
+      [15.586305, 73.757247],
+      [15.586179, 73.755988],
+      [15.585340, 73.754247],
+      [15.584732, 73.753507],
+      [15.584447, 73.753114],
+      [15.584314, 73.752880],
+      [15.584069, 73.750397],
+      [15.583928, 73.748859]
+    ];
+
+    // Casing (outline) for Anjuna – Mapusa Rd.
+    L.polyline(anjunaMapusaRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Crisp white road overlay for Anjuna – Mapusa Rd.
+    L.polyline(anjunaMapusaRoadCoordinates, {
       color: '#FFFFFF',
       weight: 3.5,
       opacity: 1.0,
@@ -509,6 +669,41 @@ export default function MapContainer({
 
     const roadLabelMarker1 = L.marker(roadLabelCoords1, { icon: roadLabelIcon }).addTo(map);
     const roadLabelMarker2 = L.marker(roadLabelCoords2, { icon: roadLabelIcon }).addTo(map);
+
+    // 1.7b. Anjuna – Mapusa Rd. Premium Floating Labels
+    const anjunaMapusaCoords1: [number, number] = [15.597687, 73.781947];
+    const anjunaMapusaCoords2: [number, number] = [15.589483, 73.764539];
+
+    const anjunaMapusaLabelIcon = L.divIcon({
+      className: 'road-label-wrapper',
+      html: `
+        <div class="road-label-inner" style="
+          transform: translate(-50%, -50%);
+          display: inline-block;
+          white-space: nowrap;
+          background-color: #113225;
+          color: #FFFEF7;
+          font-family: 'Mulish', 'Inter', sans-serif;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 6px;
+          border: 1px solid #234D3B;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+          pointer-events: none;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        ">
+          Anjuna – Mapusa Rd.
+        </div>
+      `,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+
+    const anjunaMapusaMarker1 = L.marker(anjunaMapusaCoords1, { icon: anjunaMapusaLabelIcon }).addTo(map);
+    const anjunaMapusaMarker2 = L.marker(anjunaMapusaCoords2, { icon: anjunaMapusaLabelIcon }).addTo(map);
 
     // 1.8. Custom Dynamic Categorized Pins (Restaurants/Bar/Cafe, Education, Tourist Places, and Others)
     const customPoiMarkers: { marker: L.Marker; category: string }[] = [];
