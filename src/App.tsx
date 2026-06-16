@@ -432,23 +432,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Premium PDF Launcher Button */}
-                  {!imgErr && (
-                    <div className="pt-4 border-t border-stone-100 md:mt-auto">
-                      <a
-                        href={imgSrc}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-full flex items-center justify-center gap-2 h-11 md:h-12 px-4 rounded-xl border border-[#BF9861]/60 text-[#BF9861] hover:bg-[#BF9861]/10 text-[11px] md:text-xs font-sans font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer"
-                        title="Open Original PDF Floor Plan"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                           <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        Open PDF Floor Plan
-                      </a>
-                    </div>
-                  )}
                 </div>
 
                 {/* Right Interactive Blueprint Canvas */}
@@ -467,7 +450,7 @@ export default function App() {
                         </div>
                       ) : (
                         <iframe
-                          src={imgSrc}
+                          src={`${imgSrc}#toolbar=0&navpanes=0&scrollbar=0`}
                           className="w-full h-full border-none bg-transparent rounded-xl"
                           title={`Villa ${activeVillaModal.number} Floor Plan Layout`}
                         />
