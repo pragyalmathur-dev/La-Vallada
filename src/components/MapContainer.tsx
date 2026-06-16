@@ -991,8 +991,8 @@ export default function MapContainer({
     const map = mapRef.current;
     if (!map || !selectedUnit) return;
 
-    // Center map and open its popup
-    map.setView(selectedUnit.coordinate, 18, { animate: true });
+    // Center map disabled by user request to keep the map at the same position left by the user
+    // map.setView(selectedUnit.coordinate, 18, { animate: true });
 
     // Open target marker popup after a short transition delay
     setTimeout(() => {

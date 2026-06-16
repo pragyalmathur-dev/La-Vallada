@@ -1,0 +1,6 @@
+This directory is for the villa and apartment floor plans assets.
+Images should be named like:
+- Ground Floor With Dimension: 01_V_GF_WD.jpg, 12_V_GF_WD.jpg, etc.
+- Ground Floor Without Dimension: 01_V_GF_WOD.jpg, 12_V_GF_WOD.jpg, etc.
+- First Floor With Dimension: 01_V_FF_WD.jpg, 12_V_FF_WD.jpg, etc.
+- First Floor Without Dimension: 01_V_FF_WOD.jpg, 12_V_FF_WOD.jpg, etc.
