@@ -207,7 +207,7 @@ export default function App() {
     setImgErr(false);
   };
 
-  // Synchronize current floor plan PDF path naming structure
+  // Synchronize current floor plan PNG path naming structure
   useEffect(() => {
     if (!activeVillaModal) return;
     
@@ -226,16 +226,16 @@ export default function App() {
       baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_WD`;
     }
     
-    const pdfUrl = `/assets/floorplans/${baseName}.pdf`;
-    setImgSrc(pdfUrl);
+    const pngUrl = `/assets/floorplans/${baseName}.png`;
+    setImgSrc(pngUrl);
     
-    // Proactively verify if the PDF file exists on the server to prevent loading broken frames
-    fetch(pdfUrl, { method: 'HEAD' })
+    // Proactively verify if the PNG file exists on the server to prevent loading broken frames
+    fetch(pngUrl, { method: 'HEAD' })
       .then((res) => {
         if (res.ok) {
           setImgErr(false);
         } else {
-          // If the PDF file is missing, fallback to our architectural blueprint SVG layout
+          // If the PNG file is missing, fallback to our architectural blueprint SVG layout
           setImgErr(true);
         }
       })
@@ -449,10 +449,11 @@ export default function App() {
                           </p>
                         </div>
                       ) : (
-                        <iframe
-                          src={`${imgSrc}#toolbar=0&navpanes=0&scrollbar=0`}
-                          className="w-full h-full border-none bg-transparent rounded-xl"
-                          title={`Villa ${activeVillaModal.number} Floor Plan Layout`}
+                        <img
+                          src={imgSrc}
+                          className="w-full h-full object-contain rounded-xl"
+                          alt={`Villa ${activeVillaModal.number} Floor Plan Layout`}
+                          referrerPolicy="no-referrer"
                         />
                       )}
                     </div>
