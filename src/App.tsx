@@ -163,6 +163,44 @@ export default function App() {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [imgErr, setImgErr] = useState<boolean>(false);
 
+  // States and refs for drag-to-pan functionality
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleDragStart = (clientX: number, clientY: number) => {
+    if (zoomScale <= 1) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: clientX, y: clientY };
+    panStartRef.current = { ...panOffset };
+  };
+
+  const handleDragMove = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
+    const dx = clientX - dragStartRef.current.x;
+    const dy = clientY - dragStartRef.current.y;
+    setPanOffset({
+      x: panStartRef.current.x + dx,
+      y: panStartRef.current.y + dy,
+    });
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Reset pan values on zoom out or plan changes
+  useEffect(() => {
+    if (zoomScale <= 1) {
+      setPanOffset({ x: 0, y: 0 });
+    }
+  }, [zoomScale]);
+
+  useEffect(() => {
+    setPanOffset({ x: 0, y: 0 });
+  }, [isGroundFloor, withDimension, activeVillaModal?.number, activeVillaModal?.type]);
+
   // Ground position for site plan overlay config
   const DEFAULT_LAT = 15.588768;
   const DEFAULT_LNG = 73.786116;
@@ -436,12 +474,41 @@ export default function App() {
 
                 {/* Right Interactive Blueprint Canvas */}
                 <div className="flex-grow flex flex-col p-5 md:p-8 min-h-0 bg-stone-50/30">
-                  <div className="flex-grow relative rounded-2xl border border-stone-200/80 overflow-hidden bg-[#FAF7F2] shadow-sm flex items-center justify-center min-h-[300px] md:min-h-0 select-none">
+                  <div 
+                    className={`flex-grow relative rounded-2xl border border-stone-200/80 overflow-hidden bg-[#FAF7F2] shadow-sm flex items-center justify-center min-h-[300px] md:min-h-0 select-none ${
+                      zoomScale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
+                    }`}
+                    style={{ touchAction: zoomScale > 1 ? 'none' : 'auto' }}
+                    onMouseDown={(e) => {
+                      if (e.button !== 0) return;
+                      handleDragStart(e.clientX, e.clientY);
+                    }}
+                    onMouseMove={(e) => {
+                      handleDragMove(e.clientX, e.clientY);
+                    }}
+                    onMouseUp={handleDragEnd}
+                    onMouseLeave={handleDragEnd}
+                    onTouchStart={(e) => {
+                      if (e.touches.length === 1) {
+                        handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+                      }
+                    }}
+                    onTouchMove={(e) => {
+                      if (e.touches.length === 1) {
+                        handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+                      }
+                    }}
+                    onTouchEnd={handleDragEnd}
+                  >
                     
                     {/* Transforming Scale Render Holder */}
-                    <div className="w-full h-full p-4 transition-transform duration-300 flex items-center justify-center" style={{
-                      transform: `scale(${zoomScale})`
-                    }}>
+                    <div 
+                      className="w-full h-full p-4 flex items-center justify-center" 
+                      style={{
+                        transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                        transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                    >
                       {imgErr ? (
                         <div className="p-8 text-center flex flex-col items-center justify-center w-full h-full">
                           <p className="font-sans font-semibold text-[#BF9861] bg-[#142d22] border border-[#BF9861]/30 py-4 px-7 rounded-2xl shadow-xl text-sm leading-relaxed max-w-[325px]">
