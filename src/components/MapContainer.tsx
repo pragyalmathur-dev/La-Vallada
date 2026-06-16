@@ -89,6 +89,12 @@ const CUSTOM_POI_CATEGORIES = {
 
 const CUSTOM_POIS: CustomPOI[] = [
   {
+    id: 'poi-little-angels',
+    name: "Little Angel's Primary And Kindergarten School",
+    coordinate: [15.588295, 73.771640],
+    category: 'education'
+  },
+  {
     id: 'poi-don-bosco',
     name: 'Don Bosco Youth Welfare Centre',
     coordinate: [15.587688, 73.789836],

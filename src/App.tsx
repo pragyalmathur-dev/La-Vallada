@@ -58,7 +58,7 @@ export default function App() {
                 Vianaar
               </span>
               <h1 className="font-serif text-2xl font-bold text-[#FFFEF7] leading-none mb-1.5">
-                La Vallada
+                La Velada
               </h1>
               <span className="text-[9px] uppercase tracking-wider text-[#E3D5C9]/85 font-semibold leading-none">
                 Verla Canca, North Goa

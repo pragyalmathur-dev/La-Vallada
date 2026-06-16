@@ -44,7 +44,7 @@ export default function Sidebar({
                 VIANAAR
               </span>
               <h1 className="font-serif text-3xl font-bold text-[#FFFEF7] tracking-wide leading-none pb-0.5">
-                La Vallada
+                La Velada
               </h1>
               <p className="text-[10px] font-medium tracking-[2.5px] text-[#E3D5C9] uppercase pt-0.5">
                 Verla Canca, North Goa

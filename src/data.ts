@@ -291,7 +291,7 @@ export const RENDERS: RenderImage[] = [
     id: 'render-ext-2',
     title: 'Modern Tropical Landscape Elevation',
     url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
-    description: 'Aerial view of the lush Goan hillside flanking the pristine modern estates of La Vallada, emphasizing privacy and native tropical landscaping.',
+    description: 'Aerial view of the lush Goan hillside flanking the pristine modern estates of La Velada, emphasizing privacy and native tropical landscaping.',
     category: 'Exterior'
   },
   {
