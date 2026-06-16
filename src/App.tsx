@@ -155,8 +155,8 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<string>('Overview');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-  // Villa Floor Plan Modal states
-  const [activeVillaModal, setActiveVillaModal] = useState<{ number: string; type: '2bhk-villas' | '3bhk-villas'; status: string } | null>(null);
+  // Villa/Apartment Floor Plan Modal states
+  const [activeVillaModal, setActiveVillaModal] = useState<{ number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string } | null>(null);
   const [withDimension, setWithDimension] = useState<boolean>(true);
   const [isGroundFloor, setIsGroundFloor] = useState<boolean>(true);
   const [zoomScale, setZoomScale] = useState<number>(1);
@@ -189,9 +189,13 @@ export default function App() {
     }
   };
 
-  const handleOpenVillaFloorPlan = (villa: { number: string; type: '2bhk-villas' | '3bhk-villas'; status: string }) => {
-    const num = parseInt(villa.number, 10);
-    const resolvedType: '2bhk-villas' | '3bhk-villas' = (num >= 1 && num <= 8) ? '3bhk-villas' : '2bhk-villas';
+  const handleOpenVillaFloorPlan = (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string }) => {
+    let resolvedType: '2bhk-villas' | '3bhk-villas' | '2bhk-apts' = villa.type;
+    
+    if (villa.type !== '2bhk-apts') {
+      const num = parseInt(villa.number, 10);
+      resolvedType = (num >= 1 && num <= 8) ? '3bhk-villas' : '2bhk-villas';
+    }
     
     setActiveVillaModal({
       ...villa,
@@ -203,24 +207,42 @@ export default function App() {
     setImgErr(false);
   };
 
-  // Synchronize current floor plan image path naming structure
+  // Synchronize current floor plan PDF path naming structure
   useEffect(() => {
     if (!activeVillaModal) return;
-    const baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_${withDimension ? 'WD' : 'WOD'}`;
-    setImgSrc(`/assets/floorplans/${baseName}.jpg`);
-    setImgErr(false);
-  }, [activeVillaModal, isGroundFloor, withDimension]);
-
-  const handleImgError = () => {
-    // If JPG image load fails, attempt loading clean PNG format extension
-    if (imgSrc.endsWith('.jpg')) {
-      const baseName = `${activeVillaModal?.number}_V_${isGroundFloor ? 'GF' : 'FF'}_${withDimension ? 'WD' : 'WOD'}`;
-      setImgSrc(`/assets/floorplans/${baseName}.png`);
+    
+    let baseName = '';
+    if (activeVillaModal.type === '2bhk-apts') {
+      // Remove whitespace for filename compliance
+      const cleanNum = activeVillaModal.number.replace(/\s+/g, '');
+      if (cleanNum.toLowerCase().startsWith('block')) {
+        // Block-level floor plans
+        baseName = `${cleanNum}_A_${isGroundFloor ? 'GF' : 'FF'}_WD`;
+      } else {
+        // Specific apartment unit floor plans
+        baseName = `${cleanNum}_A_WD`;
+      }
     } else {
-      // Ultimately path failed, render high-fidelity modular SVG fallback blueprint
-      setImgErr(true);
+      baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_WD`;
     }
-  };
+    
+    const pdfUrl = `/assets/floorplans/${baseName}.pdf`;
+    setImgSrc(pdfUrl);
+    
+    // Proactively verify if the PDF file exists on the server to prevent loading broken frames
+    fetch(pdfUrl, { method: 'HEAD' })
+      .then((res) => {
+        if (res.ok) {
+          setImgErr(false);
+        } else {
+          // If the PDF file is missing, fallback to our architectural blueprint SVG layout
+          setImgErr(true);
+        }
+      })
+      .catch(() => {
+        setImgErr(true);
+      });
+  }, [activeVillaModal, isGroundFloor]);
 
   return (
     <div id="vianaar-platform-app" className="h-screen w-screen flex overflow-hidden bg-[#FFFEF7] font-sans text-[#302F2C] select-none">
@@ -243,7 +265,7 @@ export default function App() {
           type="button"
           id="sidebar-toggle-btn"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute top-4 left-6 z-[1100] w-12 h-12 rounded-full border border-[#BF9861] bg-[#234D3B]/95 text-[#FFFEF7] hover:bg-[#BF9861] hover:text-[#234D3B] flex items-center justify-center shadow-2xl cursor-pointer transition-all duration-300 pointer-events-auto"
+          className="absolute top-4 left-6 z-[1600] w-12 h-12 rounded-full border border-[#BF9861] bg-[#234D3B]/95 text-[#FFFEF7] hover:bg-[#BF9861] hover:text-[#234D3B] flex items-center justify-center shadow-2xl cursor-pointer transition-all duration-300 pointer-events-auto"
           title={sidebarOpen ? "Close Estate Configurator" : "Open Estate Configurator"}
         >
           <div className="flex flex-col gap-[4.5px] items-center justify-center">
@@ -327,7 +349,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 md:p-8 select-none pointer-events-auto"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-3 md:p-8 select-none pointer-events-auto"
             onClick={() => setActiveVillaModal(null)}
           >
             {/* Modal Body Container */}
@@ -336,29 +358,23 @@ export default function App() {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 30, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-5xl w-full border border-[#BF9861]/35 flex flex-col h-[90vh] max-h-[700px]"
+              className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-5xl w-full border border-[#BF9861]/35 flex flex-col h-[92vh] md:h-[90vh] max-h-[780px]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header section with X */}
-              <div className="flex justify-between items-start px-8 pt-7 pb-4 border-b border-stone-100 flex-shrink-0">
+              <div className="flex justify-between items-start px-5 md:px-8 pt-5 md:pt-7 pb-3.5 border-b border-stone-100 flex-shrink-0">
                 <div className="space-y-1">
-                  <h2 className="font-serif text-3xl font-bold tracking-tight text-[#234D3B] uppercase">
-                    VILLA {activeVillaModal.number}
+                  <h2 className="font-serif text-2xl md:text-3xl font-extrabold tracking-tight text-[#234D3B] uppercase">
+                    {activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} {activeVillaModal.number}
                   </h2>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-sans font-bold tracking-[3px] text-stone-400 uppercase leading-none">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <span className="text-[9px] md:text-[10px] font-sans font-bold tracking-[2px] md:tracking-[3px] text-stone-400 uppercase leading-none">
                       FLOOR PLAN PERSPECTIVE
                     </span>
                     <span className="text-stone-300 leading-none pb-0.5">•</span>
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-sans font-bold uppercase tracking-wider leading-none" style={{
-                      borderColor: activeVillaModal.status === 'Available' ? '#257057/25' : activeVillaModal.status === 'Reserved' ? '#AA783B/35' : '#78716C/35',
-                      backgroundColor: activeVillaModal.status === 'Available' ? '#E7F2EE' : activeVillaModal.status === 'Reserved' ? '#FDF8F2' : '#F5F5F4',
-                      color: activeVillaModal.status === 'Available' ? '#234D3B' : activeVillaModal.status === 'Reserved' ? '#AA783B' : '#78716C',
-                    }}>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{
-                        backgroundColor: activeVillaModal.status === 'Available' ? '#234D3B' : activeVillaModal.status === 'Reserved' ? '#AA783B' : '#78716C',
-                      }}></span>
-                      {activeVillaModal.status}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#234D3B] bg-[#E7F2EE] text-[#234D3B] text-[9px] md:text-[10px] font-sans font-extrabold uppercase tracking-widest leading-none shadow-sm animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#234D3B]"></span>
+                      AVAILABLE
                     </div>
                   </div>
                 </div>
@@ -366,34 +382,34 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setActiveVillaModal(null)}
-                  className="w-10 h-10 rounded-full hover:bg-stone-50 flex items-center justify-center text-stone-400 hover:text-stone-800 transition-all font-sans font-light text-xl cursor-pointer border border-stone-100 shadow-sm"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full hover:bg-stone-50 flex items-center justify-center text-stone-400 hover:text-stone-800 transition-all font-sans font-light text-lg cursor-pointer border border-stone-100 shadow-sm"
                 >
                   ✕
                 </button>
               </div>
 
               {/* Main Dialog Grid Panel */}
-              <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white">
+              <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white overflow-y-auto md:overflow-hidden">
                 
                 {/* Left controls sidebar */}
-                <div className="w-full md:w-[260px] p-8 border-r border-stone-100 flex flex-col space-y-7 flex-shrink-0 bg-white select-none justify-start">
+                <div className="w-full md:w-[260px] p-5 md:p-8 md:border-r border-b md:border-b-0 border-stone-100 flex flex-col space-y-5 md:space-y-7 flex-shrink-0 bg-white select-none justify-start">
 
                   {/* Floor Level Vertical List Selection */}
-                  <div className="space-y-3">
-                    <span className="text-[10px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
+                  <div className="space-y-2 md:space-y-3">
+                    <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
                       FLOOR LEVEL
                     </span>
-                    <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-2 md:flex md:flex-col gap-2.5 md:gap-3">
                       <button
                         type="button"
                         onClick={() => setIsGroundFloor(true)}
-                        className={`w-full flex items-center justify-between px-5 h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
                           isGroundFloor
                             ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
                             : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
                         }`}
                       >
-                        <span className="text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
+                        <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
                         {isGroundFloor && (
                           <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
                         )}
@@ -402,77 +418,99 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setIsGroundFloor(false)}
-                        className={`w-full flex items-center justify-between px-5 h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
                           !isGroundFloor
                             ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
                             : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
                         }`}
                       >
-                        <span className="text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
+                        <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
                         {!isGroundFloor && (
                           <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
                         )}
                       </button>
                     </div>
                   </div>
+
+                  {/* Premium PDF Launcher Button */}
+                  {!imgErr && (
+                    <div className="pt-4 border-t border-stone-100 md:mt-auto">
+                      <a
+                        href={imgSrc}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full flex items-center justify-center gap-2 h-11 md:h-12 px-4 rounded-xl border border-[#BF9861]/60 text-[#BF9861] hover:bg-[#BF9861]/10 text-[11px] md:text-xs font-sans font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer"
+                        title="Open Original PDF Floor Plan"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Open PDF Floor Plan
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right Interactive Blueprint Canvas */}
-                <div className="flex-grow flex flex-col p-8 min-h-0 bg-stone-50/30">
-                  <div className="flex-grow relative rounded-2xl border border-stone-200/80 overflow-hidden bg-[#FAF7F2] shadow-sm flex items-center justify-center min-h-0 select-none">
+                <div className="flex-grow flex flex-col p-5 md:p-8 min-h-0 bg-stone-50/30">
+                  <div className="flex-grow relative rounded-2xl border border-stone-200/80 overflow-hidden bg-[#FAF7F2] shadow-sm flex items-center justify-center min-h-[300px] md:min-h-0 select-none">
                     
                     {/* Transforming Scale Render Holder */}
-                    <div className="w-full h-full max-w-[460px] max-h-[340px] p-4 transition-transform duration-300 flex items-center justify-center" style={{
+                    <div className="w-full h-full p-4 transition-transform duration-300 flex items-center justify-center" style={{
                       transform: `scale(${zoomScale})`
                     }}>
                       {imgErr ? (
-                        getVillaBlueprintSVG(activeVillaModal.number, isGroundFloor, withDimension, activeVillaModal.type === '3bhk-villas')
+                        <div className="p-8 text-center flex flex-col items-center justify-center w-full h-full">
+                          <p className="font-sans font-semibold text-[#BF9861] bg-[#142d22] border border-[#BF9861]/30 py-4 px-7 rounded-2xl shadow-xl text-sm leading-relaxed max-w-[325px]">
+                            Oops! Please reach out to the admin.
+                          </p>
+                        </div>
                       ) : (
-                        <img
+                        <iframe
                           src={imgSrc}
-                          alt={`Villa ${activeVillaModal.number} Floor Plan Layout`}
-                          className="w-full h-full object-contain select-none"
-                          onError={handleImgError}
-                          referrerPolicy="no-referrer"
+                          className="w-full h-full border-none bg-transparent rounded-xl"
+                          title={`Villa ${activeVillaModal.number} Floor Plan Layout`}
                         />
                       )}
                     </div>
 
                     {/* Floating Zoom controls widget bottom right */}
-                    <div className="absolute bottom-6 right-6 flex flex-col rounded-xl bg-stone-900/95 shadow-2xl p-1 gap-1 border border-white/10 z-10">
-                      <button
-                        type="button"
-                        onClick={() => setZoomScale(s => Math.min(3, s + 0.25))}
-                        disabled={zoomScale >= 3}
-                        className="w-9 h-9 rounded-lg hover:bg-white/10 text-white flex items-center justify-center cursor-pointer transition-all disabled:opacity-35 disabled:cursor-not-allowed font-bold"
-                        title="Zoom In"
-                      >
-                        <Plus size={16} strokeWidth={2.5} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setZoomScale(s => Math.max(1, s - 0.25))}
-                        disabled={zoomScale <= 1}
-                        className="w-9 h-9 rounded-lg hover:bg-white/10 text-white flex items-center justify-center cursor-pointer transition-all disabled:opacity-35 disabled:cursor-not-allowed font-bold"
-                        title="Zoom Out"
-                      >
-                        <Minus size={16} strokeWidth={2.5} />
-                      </button>
-                    </div>
+                    {!imgErr && (
+                      <div className="absolute bottom-6 right-6 flex flex-col rounded-xl bg-stone-900/95 shadow-2xl p-1 gap-1 border border-white/10 z-10">
+                        <button
+                          type="button"
+                          onClick={() => setZoomScale(s => Math.min(3, s + 0.25))}
+                          disabled={zoomScale >= 3}
+                          className="w-9 h-9 rounded-lg hover:bg-white/10 text-white flex items-center justify-center cursor-pointer transition-all disabled:opacity-35 disabled:cursor-not-allowed font-bold"
+                          title="Zoom In"
+                        >
+                          <Plus size={16} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setZoomScale(s => Math.max(1, s - 0.25))}
+                          disabled={zoomScale <= 1}
+                          className="w-9 h-9 rounded-lg hover:bg-white/10 text-white flex items-center justify-center cursor-pointer transition-all disabled:opacity-35 disabled:cursor-not-allowed font-bold"
+                          title="Zoom Out"
+                        >
+                          <Minus size={16} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Footnote matching design spec below container */}
-                  <div className="pt-5 border-t border-stone-100 mt-4 flex justify-between items-center flex-shrink-0 text-stone-500 text-xs">
+                  <div className="pt-4 border-t border-stone-100 mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 flex-shrink-0 text-stone-500 text-xs">
                     <div className="space-y-0.5">
                       <h4 className="font-serif text-lg font-bold text-[#234D3B] leading-none mb-1">
-                        Villa {activeVillaModal.number}
+                        {activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} {activeVillaModal.number}
                       </h4>
                       <p className="text-[10px] font-sans font-bold tracking-wider text-stone-400 block uppercase">
-                        {isGroundFloor ? 'GROUND' : 'FIRST'} FLOOR LAYOUT - {withDimension ? 'WITH DIMENSIONS' : 'WITHOUT DIMENSIONS'}
+                        {activeVillaModal.type === '2bhk-apts' ? 'SUITE DETAILED LAYOUT' : `${isGroundFloor ? 'GROUND' : 'FIRST'} FLOOR LAYOUT - COMPREHENSIVE PLAN`}
                       </p>
                     </div>
                     <span className="text-[10px] font-sans font-bold tracking-wider uppercase text-stone-400">
-                      Verla Canca · Vianaar Boutique Villas
+                      Verla Canca · Vianaar Boutique Homes
                     </span>
                   </div>
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building, 
@@ -22,7 +22,7 @@ interface SidebarProps {
   selectedUnit: Unit | null;
   setSelectedUnit: (unit: Unit | null) => void;
   onFlyToUnit: (unit: Unit) => void;
-  onOpenVillaFloorPlan?: (villa: { number: string; type: '2bhk-villas' | '3bhk-villas'; status: string }) => void;
+  onOpenVillaFloorPlan?: (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string }) => void;
 }
 
 type NavCategory = 'floorplans' | 'renders';
@@ -42,6 +42,18 @@ export default function Sidebar({
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string; desc: string } | null>(null);
   const [selectedSubItem, setSelectedSubItem] = useState<string | null>(null);
   const [selectedSubSubItem, setSelectedSubSubItem] = useState<string | null>(null);
+  const [renderImgErr, setRenderImgErr] = useState<boolean>(false);
+
+  // Responsive state for mobile adaptation
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Sub-items mappings
   const subItemsMap: Record<NavItem, string[]> = {
@@ -73,6 +85,7 @@ export default function Sidebar({
     setActiveItem(item);
     setSelectedSubItem(null); // Reset sub item on main item change
     setSelectedSubSubItem(null); // Reset sub-sub item
+    setRenderImgErr(false);
   };
 
   const handleSubItemClick = (subItem: string) => {
@@ -83,28 +96,39 @@ export default function Sidebar({
     let status = 'Available';
     const paddedNum = subItem.padStart(2, '0');
     
-    if (activeCategory === 'floorplans' && activeItem && (activeItem === '2bhk-villas' || activeItem === '3bhk-villas')) {
-      // Find matching unit status
-      const cleanId = `V-${paddedNum}`;
-      const foundUnit = units.find(u => u.id === cleanId || u.id === `V-0${subItem}`);
-      if (foundUnit) {
-        status = foundUnit.status;
-      } else {
-        const numVal = parseInt(subItem, 10);
-        status = numVal % 3 === 0 ? 'Available' : numVal % 3 === 1 ? 'Reserved' : 'Sold';
-      }
-      
-      if (onOpenVillaFloorPlan) {
-        onOpenVillaFloorPlan({
-          number: paddedNum,
-          type: activeItem,
-          status: status
-        });
+    if (activeCategory === 'floorplans' && activeItem) {
+      if (activeItem === '2bhk-villas' || activeItem === '3bhk-villas') {
+        // Find matching unit status
+        const cleanId = `V-${paddedNum}`;
+        const foundUnit = units.find(u => u.id === cleanId || u.id === `V-0${subItem}`);
+        if (foundUnit) {
+          status = foundUnit.status;
+        } else {
+          const numVal = parseInt(subItem, 10);
+          status = numVal % 3 === 0 ? 'Available' : numVal % 3 === 1 ? 'Reserved' : 'Sold';
+        }
+        
+        if (onOpenVillaFloorPlan) {
+          onOpenVillaFloorPlan({
+            number: paddedNum,
+            type: activeItem,
+            status: status
+          });
+        }
+      } else if (activeItem === '2bhk-apts') {
+        if (onOpenVillaFloorPlan) {
+          onOpenVillaFloorPlan({
+            number: subItem, // e.g., "Block A"
+            type: '2bhk-apts',
+            status: 'Available'
+          });
+        }
       }
     } else if (activeCategory === 'renders' && activeItem) {
       // Directly trigger lightbox with render for the selected category of residences
       const details = renderDetails[activeItem];
       if (details) {
+        setRenderImgErr(false);
         setLightboxImage({
           url: details.url,
           title: `${details.title} (Residence ${subItem})`,
@@ -199,6 +223,17 @@ export default function Sidebar({
         features: ['Forest-facing views', 'Spacious Balcony', 'Premium Fittings']
       };
       setSelectedUnit(tempUnit);
+    }
+
+    // Trigger Floor Plan Modal for Apartments when clicked under floorplans category
+    if (activeCategory === 'floorplans' && activeItem === '2bhk-apts') {
+      if (onOpenVillaFloorPlan) {
+        onOpenVillaFloorPlan({
+          number: subSubItem, // e.g. "A101"
+          type: '2bhk-apts',
+          status: 'Available'
+        });
+      }
     }
   };
 
@@ -380,13 +415,19 @@ export default function Sidebar({
     <>
       <motion.aside
         id="sidebar"
-        initial={{ width: 0, opacity: 0 }}
-        animate={isOpen ? { width: 380, opacity: 1 } : { width: 0, opacity: 0 }}
-        exit={{ width: 0, opacity: 0 }}
+        initial={isMobile ? { x: '-100%', opacity: 0 } : { width: 0, opacity: 0 }}
+        animate={
+          isOpen 
+            ? (isMobile ? { x: 0, opacity: 1, width: '100vw' } : { width: 380, opacity: 1 }) 
+            : (isMobile ? { x: '-100%', opacity: 0, width: '0vw' } : { width: 0, opacity: 0 })
+        }
+        exit={isMobile ? { x: '-100%', opacity: 0 } : { width: 0, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="h-full bg-white border-r border-[#BF9861]/25 flex flex-col z-[1000] relative text-[#302F2C] select-none overflow-hidden shrink-0 shadow-2xl"
+        className={`h-full bg-white border-r border-[#BF9861]/25 flex flex-col z-[1500] ${
+          isMobile ? 'fixed inset-y-0 left-0 shadow-2xl w-full' : 'relative shrink-0'
+        } text-[#302F2C] select-none overflow-hidden`}
       >
-        <div className="w-[380px] h-full flex flex-col">
+        <div className="w-full md:w-[380px] h-full flex flex-col">
           {/* ─── BRAND HEADER ─── */}
           <div className="p-6 pt-10 pb-5 border-b border-[#BF9861]/25 bg-[#FFFEF7] flex-shrink-0">
             <div className="flex flex-col space-y-1">
@@ -406,10 +447,10 @@ export default function Sidebar({
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-7 custom-scrollbar bg-white">
             
             {/* SECTION 1: FLOOR PLANS */}
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div className="flex items-center gap-2">
-                <Layers size={14} className="text-[#BF9861]" />
-                <h3 className="text-xs font-serif font-bold uppercase tracking-[0.15em] text-[#234D3B]">
+                <Layers size={16} className="text-[#BF9861]" />
+                <h3 className="text-[13.5px] font-serif font-extrabold uppercase tracking-[0.18em] text-[#234D3B]">
                   Floor Plans
                 </h3>
               </div>
@@ -420,45 +461,45 @@ export default function Sidebar({
                   type="button"
                   id="btn-fp-2bhk-villas"
                   onClick={() => handleItemSelect('floorplans', '2bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-20 ${
+                  className={`flex flex-col items-center justify-center p-3.5 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[92px] ${
                     activeCategory === 'floorplans' && activeItem === '2bhk-villas'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <Building size={16} className="mb-1.5 opacity-90" />
-                  <span className="text-[10px] font-sans font-bold leading-tight uppercase tracking-wider">2 BHK</span>
-                  <span className="text-[8px] font-sans font-light opacity-80 uppercase leading-none">Villas</span>
+                  <Building size={18} className="mb-1.5 opacity-90" />
+                  <span className="text-[11.5px] font-sans font-extrabold leading-tight uppercase tracking-wider">2 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-wide uppercase leading-none opacity-80">Villas</span>
                 </button>
 
                 <button
                   type="button"
                   id="btn-fp-3bhk-villas"
                   onClick={() => handleItemSelect('floorplans', '3bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-20 ${
+                  className={`flex flex-col items-center justify-center p-3.5 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[92px] ${
                     activeCategory === 'floorplans' && activeItem === '3bhk-villas'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <Building2 size={16} className="mb-1.5 opacity-90" />
-                  <span className="text-[10px] font-sans font-bold leading-tight uppercase tracking-wider">3 BHK</span>
-                  <span className="text-[8px] font-sans font-light opacity-80 uppercase leading-none">Villas</span>
+                  <Building2 size={18} className="mb-1.5 opacity-90" />
+                  <span className="text-[11.5px] font-sans font-extrabold leading-tight uppercase tracking-wider">3 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-wide uppercase leading-none opacity-80">Villas</span>
                 </button>
 
                 <button
                   type="button"
                   id="btn-fp-2bhk-apts"
                   onClick={() => handleItemSelect('floorplans', '2bhk-apts')}
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-20 ${
+                  className={`flex flex-col items-center justify-center p-3.5 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[92px] ${
                     activeCategory === 'floorplans' && activeItem === '2bhk-apts'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <Building size={16} className="mb-1.5 opacity-90" />
-                  <span className="text-[10px] font-sans font-bold leading-tight uppercase tracking-wider">2 BHK</span>
-                  <span className="text-[8px] font-sans font-light opacity-80 uppercase leading-none">Apartments</span>
+                  <Building size={18} className="mb-1.5 opacity-90" />
+                  <span className="text-[11.5px] font-sans font-extrabold leading-tight uppercase tracking-wider">2 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-wide uppercase leading-none opacity-80">Apartments</span>
                 </button>
               </div>
 
@@ -473,8 +514,8 @@ export default function Sidebar({
                     transition={{ duration: 0.25 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-stone-50/80 p-3 rounded-lg border border-[#BF9861]/15 mt-1 space-y-2.5 shadow-inner">
-                      <span className="text-[9px] font-sans font-bold text-[#234D3B]/70 uppercase tracking-widest block">
+                    <div className="bg-stone-50/80 p-3.5 rounded-lg border border-[#BF9861]/15 mt-1.5 space-y-3 shadow-inner">
+                      <span className="text-[10.5px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block">
                         {activeItem === '2bhk-apts' ? 'SELECT RESIDENCE BLOCK' : 'SELECT RESIDENCE NUMBER'}
                       </span>
                       <div className={`grid gap-1.5 ${
@@ -486,9 +527,9 @@ export default function Sidebar({
                             key={subItem}
                             type="button"
                             onClick={() => handleSubItemClick(subItem)}
-                            className={`py-1 text-[10px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
+                            className={`py-2 text-[12px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
                               selectedSubItem === subItem
-                                ? 'bg-[#BF9861] border-[#BF9861] text-white shadow'
+                                ? 'bg-[#BF9861] border-[#BF9861] text-white shadow font-extrabold'
                                 : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]'
                             }`}
                           >
@@ -506,9 +547,9 @@ export default function Sidebar({
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="mt-3 pt-2.5 border-t border-[#BF9861]/15 space-y-2"
+                            className="mt-3.5 pt-3 border-t border-[#BF9861]/15 space-y-2.5"
                           >
-                            <span className="text-[9px] font-sans font-bold text-[#234D3B]/70 uppercase tracking-widest block">
+                            <span className="text-[10px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block">
                               SELECT RESIDENCE IN {selectedSubItem.toUpperCase()}
                             </span>
                             <div className="grid grid-cols-4 gap-1.5">
@@ -517,9 +558,9 @@ export default function Sidebar({
                                   key={aptCode}
                                   type="button"
                                   onClick={() => handleSubSubItemClick(aptCode)}
-                                  className={`py-1 text-[9.5px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
+                                  className={`py-2 text-[11px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
                                     selectedSubSubItem === aptCode
-                                      ? 'bg-[#234D3B] border-[#234D3B] text-white shadow'
+                                      ? 'bg-[#234D3B] border-[#234D3B] text-white shadow font-extrabold'
                                       : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/50 hover:bg-[#FFFEF7]'
                                   }`}
                                 >
@@ -537,10 +578,10 @@ export default function Sidebar({
             </div>
 
             {/* SECTION 2: RENDERS */}
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div className="flex items-center gap-2">
-                <Eye size={14} className="text-[#BF9861]" />
-                <h3 className="text-xs font-serif font-bold uppercase tracking-[0.15em] text-[#234D3B]">
+                <Eye size={16} className="text-[#BF9861]" />
+                <h3 className="text-[13.5px] font-serif font-extrabold uppercase tracking-[0.18em] text-[#234D3B]">
                   Renders
                 </h3>
               </div>
@@ -551,42 +592,42 @@ export default function Sidebar({
                   type="button"
                   id="btn-render-3bhk-villas"
                   onClick={() => handleItemSelect('renders', '3bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-16 ${
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
                     activeCategory === 'renders' && activeItem === '3bhk-villas'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <span className="text-[9px] font-sans font-bold uppercase tracking-wider leading-tight">3 BHK</span>
-                  <span className="text-[7.5px] font-sans font-light uppercase tracking-wider leading-none opacity-80">Villas</span>
+                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">3 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Villas</span>
                 </button>
 
                 <button
                   type="button"
                   id="btn-render-2bhk-villas"
                   onClick={() => handleItemSelect('renders', '2bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-16 ${
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
                     activeCategory === 'renders' && activeItem === '2bhk-villas'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <span className="text-[9px] font-sans font-bold uppercase tracking-wider leading-tight">2 BHK</span>
-                  <span className="text-[7.5px] font-sans font-light uppercase tracking-wider leading-none opacity-80">Villas</span>
+                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">2 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Villas</span>
                 </button>
 
                 <button
                   type="button"
                   id="btn-render-2bhk-apts"
                   onClick={() => handleItemSelect('renders', '2bhk-apts')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-16 ${
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
                     activeCategory === 'renders' && activeItem === '2bhk-apts'
                       ? 'bg-[#234D3B] border-[#234D3B] text-white'
                       : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
                   }`}
                 >
-                  <span className="text-[9px] font-sans font-bold uppercase tracking-wider leading-tight">2 BHK</span>
-                  <span className="text-[7.5px] font-sans font-light uppercase tracking-wider leading-none opacity-80">Apartments</span>
+                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">2 BHK</span>
+                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Apartments</span>
                 </button>
               </div>
 
@@ -601,8 +642,8 @@ export default function Sidebar({
                     transition={{ duration: 0.25 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-stone-50/80 p-3 rounded-lg border border-[#BF9861]/15 mt-1 space-y-2.5 shadow-inner">
-                      <span className="text-[9px] font-sans font-bold text-[#234D3B]/70 uppercase tracking-widest block font-mono">
+                    <div className="bg-stone-50/80 p-3.5 rounded-lg border border-[#BF9861]/15 mt-1.5 space-y-3 shadow-inner">
+                      <span className="text-[10.5px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block font-mono">
                         {activeItem === '2bhk-apts' ? 'SELECT RESIDENCE BLOCK' : 'SELECT RESIDENCE NUMBER'}
                       </span>
                       <div className={`grid gap-1.5 ${
@@ -614,9 +655,9 @@ export default function Sidebar({
                             key={subItem}
                             type="button"
                             onClick={() => handleSubItemClick(subItem)}
-                            className={`py-1 text-[10px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
+                            className={`py-2 text-[12px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
                               selectedSubItem === subItem
-                                ? 'bg-[#BF9861] border-[#BF9861] text-white shadow'
+                                ? 'bg-[#BF9861] border-[#BF9861] text-white shadow font-extrabold'
                                 : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]'
                             }`}
                           >
@@ -634,9 +675,9 @@ export default function Sidebar({
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="mt-3 pt-2.5 border-t border-[#BF9861]/15 space-y-2"
+                            className="mt-3.5 pt-3 border-t border-[#BF9861]/15 space-y-2.5"
                           >
-                            <span className="text-[9px] font-sans font-bold text-[#234D3B]/70 uppercase tracking-widest block">
+                            <span className="text-[10px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block">
                               SELECT RESIDENCE IN {selectedSubItem.toUpperCase()}
                             </span>
                             <div className="grid grid-cols-4 gap-1.5">
@@ -645,9 +686,9 @@ export default function Sidebar({
                                   key={aptCode}
                                   type="button"
                                   onClick={() => handleSubSubItemClick(aptCode)}
-                                  className={`py-1 text-[9.5px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
+                                  className={`py-2 text-[11px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
                                     selectedSubSubItem === aptCode
-                                      ? 'bg-[#234D3B] border-[#234D3B] text-white shadow'
+                                      ? 'bg-[#234D3B] border-[#234D3B] text-white shadow font-extrabold'
                                       : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/50 hover:bg-[#FFFEF7]'
                                   }`}
                                 >
@@ -693,13 +734,22 @@ export default function Sidebar({
               className="max-w-4xl w-full bg-white border border-[#BF9861]/40 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="md:w-3/5 h-64 md:h-[480px]">
-                <img 
-                  src={lightboxImage.url} 
-                  alt={lightboxImage.title}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
+              <div className="md:w-3/5 h-64 md:h-[480px] bg-stone-900 border-b md:border-b-0 md:border-r border-[#BF9861]/25 flex items-center justify-center overflow-hidden">
+                {renderImgErr ? (
+                  <div className="p-8 text-center flex flex-col items-center justify-center">
+                    <p className="font-sans font-semibold text-[#BF9861] bg-[#142d22] border border-[#BF9861]/30 py-3.5 px-6 rounded-xl shadow-md text-sm leading-relaxed max-w-[280px]">
+                      Oops! Please reach out to the admin.
+                    </p>
+                  </div>
+                ) : (
+                  <img 
+                    src={lightboxImage.url} 
+                    alt={lightboxImage.title}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={() => setRenderImgErr(true)}
+                  />
+                )}
               </div>
               <div className="p-6 md:w-2/5 flex flex-col justify-between bg-white text-[#302F2C]">
                 <div className="space-y-4">
