@@ -156,7 +156,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   // Villa/Apartment Floor Plan Modal states
-  const [activeVillaModal, setActiveVillaModal] = useState<{ number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string } | null>(null);
+  const [activeVillaModal, setActiveVillaModal] = useState<{ number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string; mode?: 'floorplan' | 'render' } | null>(null);
   const [withDimension, setWithDimension] = useState<boolean>(true);
   const [isGroundFloor, setIsGroundFloor] = useState<boolean>(true);
   const [zoomScale, setZoomScale] = useState<number>(1);
@@ -227,10 +227,10 @@ export default function App() {
     }
   };
 
-  const handleOpenVillaFloorPlan = (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string }) => {
+  const handleOpenVillaFloorPlan = (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string; mode?: 'floorplan' | 'render' }) => {
     let resolvedType: '2bhk-villas' | '3bhk-villas' | '2bhk-apts' = villa.type;
     
-    if (villa.type !== '2bhk-apts') {
+    if (villa.type !== '2bhk-apts' && villa.mode !== 'render') {
       const num = parseInt(villa.number, 10);
       resolvedType = (num >= 1 && num <= 8) ? '3bhk-villas' : '2bhk-villas';
     }
@@ -245,41 +245,112 @@ export default function App() {
     setImgErr(false);
   };
 
-  // Synchronize current floor plan PNG path naming structure
+  // Synchronize current floor plan PNG or Render path naming structure
   useEffect(() => {
     if (!activeVillaModal) return;
     
-    let baseName = '';
-    if (activeVillaModal.type === '2bhk-apts') {
-      // Remove whitespace for filename compliance
-      const cleanNum = activeVillaModal.number.replace(/\s+/g, '');
-      if (cleanNum.toLowerCase().startsWith('block')) {
-        // Block-level floor plans
-        baseName = `${cleanNum}_A_${isGroundFloor ? 'GF' : 'FF'}_WD`;
-      } else {
-        // Specific apartment unit floor plans
-        baseName = `${cleanNum}_A_WD`;
-      }
-    } else {
-      baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_WD`;
-    }
-    
-    const pngUrl = `/assets/floorplans/${baseName}.png`;
-    setImgSrc(pngUrl);
-    
-    // Proactively verify if the PNG file exists on the server to prevent loading broken frames
-    fetch(pngUrl, { method: 'HEAD' })
-      .then((res) => {
-        if (res.ok) {
+    if (activeVillaModal.mode === 'render') {
+      const type = activeVillaModal.type;
+      
+      // Possible target paths inside /assets/renders/
+      const localPngUrl = `/assets/renders/${type}.png`;
+      const localJpgUrl = `/assets/renders/${type}.jpg`;
+      const localUnderscorePngUrl = `/assets/renders/${type.replace('-', '_')}.png`;
+      const localUnderscoreJpgUrl = `/assets/renders/${type.replace('-', '_')}.jpg`;
+      
+      const fallbacks: Record<string, string> = {
+        '3bhk-villas': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
+        '2bhk-villas': 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
+        '2bhk-apts': 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80'
+      };
+      
+      setImgSrc(localPngUrl);
+      
+      // Probe for localPngUrl, if missing probe for variations, finally fall back to online Unsplash layout
+      fetch(localPngUrl, { method: 'HEAD' })
+        .then((res1) => {
+          if (res1.ok) {
+            setImgErr(false);
+          } else {
+            fetch(localJpgUrl, { method: 'HEAD' })
+              .then((res2) => {
+                if (res2.ok) {
+                  setImgSrc(localJpgUrl);
+                  setImgErr(false);
+                } else {
+                  fetch(localUnderscorePngUrl, { method: 'HEAD' })
+                    .then((res3) => {
+                      if (res3.ok) {
+                        setImgSrc(localUnderscorePngUrl);
+                        setImgErr(false);
+                      } else {
+                        fetch(localUnderscoreJpgUrl, { method: 'HEAD' })
+                          .then((res4) => {
+                            if (res4.ok) {
+                              setImgSrc(localUnderscoreJpgUrl);
+                              setImgErr(false);
+                            } else {
+                              setImgSrc(fallbacks[type] || '/assets/renders/exterior.jpg');
+                              setImgErr(false);
+                            }
+                          })
+                          .catch(() => {
+                            setImgSrc(fallbacks[type] || '/assets/renders/exterior.jpg');
+                            setImgErr(false);
+                          });
+                      }
+                    })
+                    .catch(() => {
+                      setImgSrc(fallbacks[type] || '/assets/renders/exterior.jpg');
+                      setImgErr(false);
+                    });
+                }
+              })
+              .catch(() => {
+                setImgSrc(fallbacks[type] || '/assets/renders/exterior.jpg');
+                setImgErr(false);
+              });
+          }
+        })
+        .catch(() => {
+          setImgSrc(fallbacks[type] || '/assets/renders/exterior.jpg');
           setImgErr(false);
+        });
+        
+    } else {
+      // Standard Floor Plan handling
+      let baseName = '';
+      if (activeVillaModal.type === '2bhk-apts') {
+        // Remove whitespace for filename compliance
+        const cleanNum = activeVillaModal.number.replace(/\s+/g, '');
+        if (cleanNum.toLowerCase().startsWith('block')) {
+          // Block-level floor plans
+          baseName = `${cleanNum}_A_${isGroundFloor ? 'GF' : 'FF'}_WD`;
         } else {
-          // If the PNG file is missing, fallback to our architectural blueprint SVG layout
-          setImgErr(true);
+          // Specific apartment unit floor plans
+          baseName = `${cleanNum}_A_WD`;
         }
-      })
-      .catch(() => {
-        setImgErr(true);
-      });
+      } else {
+        baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_WD`;
+      }
+      
+      const pngUrl = `/assets/floorplans/${baseName}.png`;
+      setImgSrc(pngUrl);
+      
+      // Proactively verify if the PNG file exists on the server to prevent loading broken frames
+      fetch(pngUrl, { method: 'HEAD' })
+        .then((res) => {
+          if (res.ok) {
+            setImgErr(false);
+          } else {
+            // If the PNG file is missing, fallback to our architectural blueprint SVG layout
+            setImgErr(true);
+          }
+        })
+        .catch(() => {
+          setImgErr(true);
+        });
+    }
   }, [activeVillaModal, isGroundFloor]);
 
   return (
@@ -403,11 +474,11 @@ export default function App() {
               <div className="flex justify-between items-start px-5 md:px-8 pt-5 md:pt-7 pb-3.5 border-b border-stone-100 flex-shrink-0">
                 <div className="space-y-1">
                   <h2 className="font-serif text-2xl md:text-3xl font-extrabold tracking-tight text-[#234D3B] uppercase">
-                    {activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} {activeVillaModal.number}
+                    {activeVillaModal.mode === 'render' ? `${activeVillaModal.number} Render` : `${activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} ${activeVillaModal.number}`}
                   </h2>
                   <div className="flex items-center gap-2 md:gap-3">
                     <span className="text-[9px] md:text-[10px] font-sans font-bold tracking-[2px] md:tracking-[3px] text-stone-400 uppercase leading-none">
-                      FLOOR PLAN PERSPECTIVE
+                      {activeVillaModal.mode === 'render' ? 'PHOTOREALISTIC 3D ARCHITECTURAL VIEW' : 'FLOOR PLAN PERSPECTIVE'}
                     </span>
                     <span className="text-stone-300 leading-none pb-0.5">•</span>
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#234D3B] bg-[#E7F2EE] text-[#234D3B] text-[9px] md:text-[10px] font-sans font-extrabold uppercase tracking-widest leading-none shadow-sm animate-pulse">
@@ -433,42 +504,59 @@ export default function App() {
                 <div className="w-full md:w-[260px] p-5 md:p-8 md:border-r border-b md:border-b-0 border-stone-100 flex flex-col space-y-5 md:space-y-7 flex-shrink-0 bg-white select-none justify-start">
 
                   {/* Floor Level Vertical List Selection */}
-                  <div className="space-y-2 md:space-y-3">
-                    <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
-                      FLOOR LEVEL
-                    </span>
-                    <div className="grid grid-cols-2 md:flex md:flex-col gap-2.5 md:gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsGroundFloor(true)}
-                        className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
-                          isGroundFloor
-                            ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
-                            : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
-                        }`}
-                      >
-                        <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
-                        {isGroundFloor && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
-                        )}
-                      </button>
+                  {activeVillaModal.mode !== 'render' ? (
+                    <div className="space-y-2 md:space-y-3">
+                      <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
+                        FLOOR LEVEL
+                      </span>
+                      <div className="grid grid-cols-2 md:flex md:flex-col gap-2.5 md:gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsGroundFloor(true)}
+                          className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                            isGroundFloor
+                              ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
+                              : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
+                          }`}
+                        >
+                          <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
+                          {isGroundFloor && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
+                          )}
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => setIsGroundFloor(false)}
-                        className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
-                          !isGroundFloor
-                            ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
-                            : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
-                        }`}
-                      >
-                        <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
-                        {!isGroundFloor && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
-                        )}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsGroundFloor(false)}
+                          className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                            !isGroundFloor
+                              ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
+                              : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
+                          }`}
+                        >
+                          <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
+                          {!isGroundFloor && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
+                          )}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
+                          REPRESENTATIVE IMAGE
+                        </span>
+                        <p className="text-xs text-stone-500 mt-2 leading-relaxed">
+                          This photorealistic 3D rendering displays the elegant architecture, premium natural wood paneling, local stonemasonry details, and open forest-facing layouts of our {activeVillaModal.number} designs.
+                        </p>
+                      </div>
+                      <div className="pt-4 border-t border-stone-100 space-y-2">
+                        <span className="text-[9px] font-sans font-bold text-stone-400 uppercase tracking-widest block">DEVELOPER</span>
+                        <span className="text-xs font-serif font-bold text-[#234D3B] uppercase block">Vianaar Design Studio</span>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
 
@@ -519,7 +607,7 @@ export default function App() {
                         <img
                           src={imgSrc}
                           className="w-full h-full object-contain rounded-xl"
-                          alt={`Villa ${activeVillaModal.number} Floor Plan Layout`}
+                          alt={activeVillaModal.mode === 'render' ? `${activeVillaModal.number} Render` : `Villa ${activeVillaModal.number} Floor Plan Layout`}
                           referrerPolicy="no-referrer"
                         />
                       )}
@@ -554,10 +642,10 @@ export default function App() {
                   <div className="pt-4 border-t border-stone-100 mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 flex-shrink-0 text-stone-500 text-xs">
                     <div className="space-y-0.5">
                       <h4 className="font-serif text-lg font-bold text-[#234D3B] leading-none mb-1">
-                        {activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} {activeVillaModal.number}
+                        {activeVillaModal.mode === 'render' ? activeVillaModal.number : `${activeVillaModal.type === '2bhk-apts' ? 'Residence' : 'Villa'} ${activeVillaModal.number}`}
                       </h4>
                       <p className="text-[10px] font-sans font-bold tracking-wider text-stone-400 block uppercase">
-                        {activeVillaModal.type === '2bhk-apts' ? 'SUITE DETAILED LAYOUT' : `${isGroundFloor ? 'GROUND' : 'FIRST'} FLOOR LAYOUT - COMPREHENSIVE PLAN`}
+                        {activeVillaModal.mode === 'render' ? 'PHOTOREALISTIC 3D ELEVATION' : `${activeVillaModal.type === '2bhk-apts' ? 'SUITE DETAILED LAYOUT' : `${isGroundFloor ? 'GROUND' : 'FIRST'} FLOOR LAYOUT - COMPREHENSIVE PLAN`}`}
                       </p>
                     </div>
                     <span className="text-[10px] font-sans font-bold tracking-wider uppercase text-stone-400">

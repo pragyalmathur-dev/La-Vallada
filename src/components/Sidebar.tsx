@@ -22,7 +22,7 @@ interface SidebarProps {
   selectedUnit: Unit | null;
   setSelectedUnit: (unit: Unit | null) => void;
   onFlyToUnit: (unit: Unit) => void;
-  onOpenVillaFloorPlan?: (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string }) => void;
+  onOpenVillaFloorPlan?: (villa: { number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string; mode?: 'floorplan' | 'render' }) => void;
 }
 
 type NavCategory = 'floorplans' | 'renders';
@@ -86,6 +86,17 @@ export default function Sidebar({
     setSelectedSubItem(null); // Reset sub item on main item change
     setSelectedSubSubItem(null); // Reset sub-sub item
     setRenderImgErr(false);
+
+    if (category === 'renders') {
+      if (onOpenVillaFloorPlan) {
+        onOpenVillaFloorPlan({
+          number: item === '3bhk-villas' ? '3 BHK Villa' : item === '2bhk-villas' ? '2 BHK Villa' : 'Apartment',
+          type: item,
+          status: 'Available',
+          mode: 'render'
+        });
+      }
+    }
   };
 
   const handleSubItemClick = (subItem: string) => {
@@ -630,79 +641,6 @@ export default function Sidebar({
                   <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Apartments</span>
                 </button>
               </div>
-
-              {/* Sub-buttons for Renders */}
-              <AnimatePresence mode="wait">
-                {activeCategory === 'renders' && activeItem && (
-                  <motion.div
-                    key={`render-sub-${activeItem}`}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="bg-stone-50/80 p-3.5 rounded-lg border border-[#BF9861]/15 mt-1.5 space-y-3 shadow-inner">
-                      <span className="text-[10.5px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block font-mono">
-                        {activeItem === '2bhk-apts' ? 'SELECT RESIDENCE BLOCK' : 'SELECT RESIDENCE NUMBER'}
-                      </span>
-                      <div className={`grid gap-1.5 ${
-                        activeItem === '2bhk-villas' ? 'grid-cols-6' :
-                        activeItem === '3bhk-villas' ? 'grid-cols-4' : 'grid-cols-3'
-                      }`}>
-                        {subItemsMap[activeItem].map((subItem) => (
-                          <button
-                            key={subItem}
-                            type="button"
-                            onClick={() => handleSubItemClick(subItem)}
-                            className={`py-2 text-[12px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
-                              selectedSubItem === subItem
-                                ? 'bg-[#BF9861] border-[#BF9861] text-white shadow font-extrabold'
-                                : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]'
-                            }`}
-                          >
-                            {subItem}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Third Level Sub-sub-buttons for Renders (Apartment Numbers) */}
-                      <AnimatePresence mode="wait">
-                        {activeItem === '2bhk-apts' && selectedSubItem && (
-                          <motion.div
-                            key={`render-subsub-${selectedSubItem}`}
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="mt-3.5 pt-3 border-t border-[#BF9861]/15 space-y-2.5"
-                          >
-                            <span className="text-[10px] font-sans font-extrabold text-[#234D3B]/70 uppercase tracking-widest block">
-                              SELECT RESIDENCE IN {selectedSubItem.toUpperCase()}
-                            </span>
-                            <div className="grid grid-cols-4 gap-1.5">
-                              {subSubItemsMap[selectedSubItem]?.map((aptCode) => (
-                                <button
-                                  key={aptCode}
-                                  type="button"
-                                  onClick={() => handleSubSubItemClick(aptCode)}
-                                  className={`py-2 text-[11px] font-sans font-bold rounded border text-center transition-all cursor-pointer ${
-                                    selectedSubSubItem === aptCode
-                                      ? 'bg-[#234D3B] border-[#234D3B] text-white shadow font-extrabold'
-                                      : 'bg-white border-[#BF9861]/15 text-[#302F2C] hover:border-[#BF9861]/50 hover:bg-[#FFFEF7]'
-                                  }`}
-                                >
-                                  {aptCode}
-                                </button>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
           </div>
