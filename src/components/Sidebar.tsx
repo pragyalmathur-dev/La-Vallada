@@ -64,8 +64,8 @@ export default function Sidebar({
 
   // Sub-sub-items mappings for 2 BHK Apartments Blocks
   const subSubItemsMap: Record<string, string[]> = {
-    'Block A': ['A101', 'A102', 'A103', 'A104', 'A201', 'A202', 'A203', 'A204', 'A301', 'A302', 'A303', 'A304', 'A401', 'A402', 'A403', 'A404'],
-    'Block B': ['B101', 'B102', 'B103', 'B104', 'B201', 'B202', 'B203', 'B204', 'B301', 'B302', 'B303', 'B304', 'B401', 'B402', 'B403', 'B404'],
+    'Block A': ['A01', 'A02', 'A03', 'A04', 'A101', 'A102', 'A103', 'A104', 'A201', 'A202', 'A203', 'A204', 'A301', 'A302', 'A303', 'A304'],
+    'Block B': ['B01', 'B02', 'B03', 'B04', 'B101', 'B102', 'B103', 'B104', 'B201', 'B202', 'B203', 'B204', 'B301', 'B302', 'B303', 'B304'],
     'Block C': ['C01', 'C02', 'C03', 'C04', 'C101', 'C102', 'C103', 'C104', 'C201', 'C202', 'C203', 'C204', 'C301', 'C302', 'C303', 'C304']
   };
 
@@ -124,14 +124,6 @@ export default function Sidebar({
             number: paddedNum,
             type: activeItem,
             status: status
-          });
-        }
-      } else if (activeItem === '2bhk-apts') {
-        if (onOpenVillaFloorPlan) {
-          onOpenVillaFloorPlan({
-            number: subItem, // e.g., "Block A"
-            type: '2bhk-apts',
-            status: 'Available'
           });
         }
       }

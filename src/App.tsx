@@ -323,13 +323,10 @@ export default function App() {
       if (activeVillaModal.type === '2bhk-apts') {
         // Remove whitespace for filename compliance
         const cleanNum = activeVillaModal.number.replace(/\s+/g, '');
-        if (cleanNum.toLowerCase().startsWith('block')) {
-          // Block-level floor plans
-          baseName = `${cleanNum}_A_${isGroundFloor ? 'GF' : 'FF'}_WD`;
-        } else {
-          // Specific apartment unit floor plans
-          baseName = `${cleanNum}_A_WD`;
-        }
+        // Format names as Block_Residence e.g. A_101, B_202, C_01
+        const blockLetter = cleanNum.charAt(0);
+        const restNum = cleanNum.substring(1);
+        baseName = `${blockLetter}_${restNum}`;
       } else {
         baseName = `${activeVillaModal.number}_V_${isGroundFloor ? 'GF' : 'FF'}_WD`;
       }
@@ -501,64 +498,66 @@ export default function App() {
               <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white overflow-y-auto md:overflow-hidden">
                 
                 {/* Left controls sidebar */}
-                <div className="w-full md:w-[260px] p-5 md:p-8 md:border-r border-b md:border-b-0 border-stone-100 flex flex-col space-y-5 md:space-y-7 flex-shrink-0 bg-white select-none justify-start">
+                {activeVillaModal.type !== '2bhk-apts' && (
+                  <div className="w-full md:w-[260px] p-5 md:p-8 md:border-r border-b md:border-b-0 border-stone-100 flex flex-col space-y-5 md:space-y-7 flex-shrink-0 bg-white select-none justify-start">
 
-                  {/* Floor Level Vertical List Selection */}
-                  {activeVillaModal.mode !== 'render' ? (
-                    <div className="space-y-2 md:space-y-3">
-                      <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
-                        FLOOR LEVEL
-                      </span>
-                      <div className="grid grid-cols-2 md:flex md:flex-col gap-2.5 md:gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setIsGroundFloor(true)}
-                          className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
-                            isGroundFloor
-                              ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
-                              : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
-                          }`}
-                        >
-                          <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
-                          {isGroundFloor && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setIsGroundFloor(false)}
-                          className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
-                            !isGroundFloor
-                              ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
-                              : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
-                          }`}
-                        >
-                          <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
-                          {!isGroundFloor && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
+                    {/* Floor Level Vertical List Selection */}
+                    {activeVillaModal.mode !== 'render' ? (
+                      <div className="space-y-2 md:space-y-3">
                         <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
-                          REPRESENTATIVE IMAGE
+                          FLOOR LEVEL
                         </span>
-                        <p className="text-xs text-stone-500 mt-2 leading-relaxed">
-                          This photorealistic 3D rendering displays the elegant architecture, premium natural wood paneling, local stonemasonry details, and open forest-facing layouts of our {activeVillaModal.number} designs.
-                        </p>
-                      </div>
-                      <div className="pt-4 border-t border-stone-100 space-y-2">
-                        <span className="text-[9px] font-sans font-bold text-stone-400 uppercase tracking-widest block">DEVELOPER</span>
-                        <span className="text-xs font-serif font-bold text-[#234D3B] uppercase block">Vianaar Design Studio</span>
-                      </div>
-                    </div>
-                  )}
+                        <div className="grid grid-cols-2 md:flex md:flex-col gap-2.5 md:gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setIsGroundFloor(true)}
+                            className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                              isGroundFloor
+                                ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
+                                : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
+                            }`}
+                          >
+                            <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">Ground Floor</span>
+                            {isGroundFloor && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
+                            )}
+                          </button>
 
-                </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsGroundFloor(false)}
+                            className={`flex items-center justify-between px-4 md:px-5 h-12 md:h-14 rounded-xl border text-left transition-all cursor-pointer ${
+                              !isGroundFloor
+                                ? 'bg-[#234D3B] border-[#234D3B] text-white shadow-md font-bold'
+                                : 'bg-[#FFFEF7] border-stone-200 text-stone-500 hover:border-[#BF9861]/60 hover:bg-stone-50/50'
+                            }`}
+                          >
+                            <span className="text-[11.5px] md:text-xs font-sans font-bold tracking-wider uppercase">First Floor</span>
+                            {!isGroundFloor && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-white block shadow-sm outline outline-offset-2 outline-white"></span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <span className="text-[10.5px] font-sans font-extrabold tracking-[2px] text-[#BF9861] uppercase block">
+                            REPRESENTATIVE IMAGE
+                          </span>
+                          <p className="text-xs text-stone-500 mt-2 leading-relaxed">
+                            This photorealistic 3D rendering displays the elegant architecture, premium natural wood paneling, local stonemasonry details, and open forest-facing layouts of our {activeVillaModal.number} designs.
+                          </p>
+                        </div>
+                        <div className="pt-4 border-t border-stone-100 space-y-2">
+                          <span className="text-[9px] font-sans font-bold text-stone-400 uppercase tracking-widest block">DEVELOPER</span>
+                          <span className="text-xs font-serif font-bold text-[#234D3B] uppercase block">Vianaar Design Studio</span>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+                )}
 
                 {/* Right Interactive Blueprint Canvas */}
                 <div className="flex-grow flex flex-col p-5 md:p-8 min-h-0 bg-stone-50/30">
