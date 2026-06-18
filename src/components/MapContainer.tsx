@@ -419,6 +419,221 @@ export default function MapContainer({
       offset: L.point(0, -28)
     });
 
+    // 1.5d-f. Shared DivIcon Pin for Vianaar projects
+    const vianaarPinHtml = `
+      <div class="vianaar-project-pin-inner vianaar-map-pin-inner" style="
+        position: relative;
+        width: 24px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0px 3px 6px rgba(35, 77, 59, 0.35));
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-origin: 12px 28px;
+      ">
+        <svg width="100%" height="100%" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+          <path d="M16 40C25 28 28 23 28 16C28 9.37 22.63 4 16 4C9.37 4 4 9.37 4 16C4 23 7 28 16 40Z" fill="#234D3B" stroke="#FFFEF7" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="16" cy="16" r="4.5" fill="#FFFEF7" />
+        </svg>
+      </div>
+    `;
+
+    const vianaarProjectIcon = L.divIcon({
+      className: 'vianaar-project-pin-wrapper',
+      html: vianaarPinHtml,
+      iconSize: [24, 30],
+      iconAnchor: [12, 28]
+    });
+
+    // La Covelo Vianaar Project
+    const laCoveloCoords: [number, number] = [15.582113, 73.777309];
+    const laCoveloMarker = L.marker(laCoveloCoords, { icon: vianaarProjectIcon }).addTo(map);
+    const laCoveloTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          La Covelo
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROJECT
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          modern contemporary apartments
+        </div>
+      </div>
+    `;
+    laCoveloMarker.bindTooltip(laCoveloTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'la-covelo-tooltip',
+      offset: L.point(0, -28)
+    });
+
+    // El Raso Vianaar Project
+    const elRasoCoords: [number, number] = [15.580562, 73.778099];
+    const elRasoMarker = L.marker(elRasoCoords, { icon: vianaarProjectIcon }).addTo(map);
+    const elRasoTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          El Raso
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROJECT
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          modern contemporary apartments
+        </div>
+      </div>
+    `;
+    elRasoMarker.bindTooltip(elRasoTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'el-raso-tooltip',
+      offset: L.point(0, -28)
+    });
+
+    // La Rozalia Vianaar Project
+    const laRozaliaCoords: [number, number] = [15.578905, 73.778555];
+    const laRozaliaMarker = L.marker(laRozaliaCoords, { icon: vianaarProjectIcon }).addTo(map);
+    const laRozaliaTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          La Rozalia
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROJECT
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          indo – portuguese villas
+        </div>
+      </div>
+    `;
+    laRozaliaMarker.bindTooltip(laRozaliaTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'la-rozalia-tooltip',
+      offset: L.point(0, -28)
+    });
+
+    // St. Anne’s Church Pin & Tooltip
+    const churchCoords: [number, number] = [15.578886, 73.779575];
+    const { distanceStr: churchDistance, driveTimeStr: churchDrive } = calculateDistanceAndDriveTime(churchCoords);
+
+    const churchIconHtml = `
+      <div class="church-pin-inner vianaar-map-pin-inner" style="
+        position: relative;
+        width: 24px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.25));
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-origin: 12px 28px;
+      ">
+        <svg width="100%" height="100%" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+          <path d="M16 40C25 28 28 23 28 16C28 9.37 22.63 4 16 4C9.37 4 4 9.37 4 16C4 23 7 28 16 40Z" fill="#7C3AED" stroke="#FFFEF7" stroke-width="2.5" stroke-linejoin="round"/>
+        </svg>
+        <div style="
+          position: absolute;
+          top: 6px;
+          width: 12px;
+          height: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#FFFEF7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="4" x2="12" y2="20"></line>
+            <line x1="8" y1="9" x2="16" y2="9"></line>
+          </svg>
+        </div>
+      </div>
+    `;
+
+    const churchIcon = L.divIcon({
+      className: 'church-pin-wrapper',
+      html: churchIconHtml,
+      iconSize: [24, 30],
+      iconAnchor: [12, 28]
+    });
+
+    const churchMarker = L.marker(churchCoords, { icon: churchIcon }).addTo(map);
+
+    const churchTooltipHtml = `
+      <div class="custom-poi-label-inner" style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Mulish', 'Inter', sans-serif;
+        background: #FFFEF7;
+        border: 1.5px solid #7C3AED;
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(17, 50, 37, 0.15);
+        padding: 10px 16px;
+        pointer-events: none;
+        text-align: center;
+      ">
+        <div style="
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          color: #234D3B;
+          text-transform: uppercase;
+          line-height: 1.2;
+          white-space: nowrap;
+        ">
+          St. Anne’s Church
+        </div>
+        <div style="
+          font-size: 8.5px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #AA783B;
+          margin-top: 5px;
+          text-transform: uppercase;
+          line-height: 1.2;
+          white-space: nowrap;
+        ">
+          ${churchDrive}
+        </div>
+        <div style="
+          font-size: 8.5px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #8E8A85;
+          margin-top: 3px;
+          text-transform: uppercase;
+          line-height: 1.2;
+          white-space: nowrap;
+        ">
+          ${churchDistance}
+        </div>
+      </div>
+    `;
+
+    churchMarker.bindTooltip(churchTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      className: 'custom-poi-tooltip',
+      offset: L.point(0, -28)
+    });
+
     // 1.6. Naikawado Rd. Curved Polyline (Solid White Line)
     const roadCoordinates: [number, number][] = [
       [15.589402, 73.785265],
@@ -546,6 +761,76 @@ export default function MapContainer({
 
     // Crisp white road overlay for third road
     L.polyline(thirdRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6cb. Extended Road Curved Polyline (Solid White Line)
+    const extendedRoadCoordinates: [number, number][] = [
+      [15.583610, 73.777161],
+      [15.583960, 73.776334],
+      [15.581946, 73.777305],
+      [15.581079, 73.777809],
+      [15.579676, 73.778411],
+      [15.578550, 73.778724],
+      [15.577991, 73.779014],
+      [15.576918, 73.779685],
+      [15.575200, 73.780767],
+      [15.574602, 73.780954],
+      [15.573795, 73.781279],
+      [15.573586, 73.781388],
+      [15.573446, 73.781514],
+      [15.573229, 73.781800],
+      [15.571665, 73.783439],
+      [15.571113, 73.783888]
+    ];
+
+    // Casing (outline) for extended road
+    L.polyline(extendedRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Crisp white road overlay for extended road
+    L.polyline(extendedRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6cc. St. Anne’s Church Road Polyline (Solid White Line)
+    const stAnnesChurchRoadCoordinates: [number, number][] = [
+      [15.576929, 73.779687],
+      [15.578082, 73.779863],
+      [15.578105, 73.780232],
+      [15.578096, 73.780513],
+      [15.577469, 73.784593],
+      [15.577448, 73.784695],
+      [15.577375, 73.784849],
+      [15.576187, 73.786618],
+      [15.576152, 73.786696],
+      [15.575942, 73.787780]
+    ];
+
+    // Casing (outline) for St. Anne's Church Road
+    L.polyline(stAnnesChurchRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Crisp white road overlay for St. Anne's Church Road
+    L.polyline(stAnnesChurchRoadCoordinates, {
       color: '#FFFFFF',
       weight: 3.5,
       opacity: 1.0,
@@ -695,6 +980,33 @@ export default function MapContainer({
 
     L.marker(verlaCancaCoords, { icon: verlaCancaLabelIcon }).addTo(map);
 
+    // 1.6f2. Parra Geographic Label (Always shown, no location pin, clean typography)
+    const parraCoords: [number, number] = [15.580229, 73.782133];
+    const parraLabelIcon = L.divIcon({
+      className: 'parra-label-wrapper',
+      html: `
+        <div style="
+          transform: translate(-50%, -50%);
+          display: inline-block;
+          white-space: nowrap;
+          color: #FFFEF7;
+          font-family: 'Mulish', 'Inter', sans-serif;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          text-shadow: 0 2px 6px rgba(17, 50, 37, 0.95), 0 0 4px rgba(17, 50, 37, 0.82);
+          pointer-events: none;
+        ">
+          PARRA
+        </div>
+      `,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+
+    L.marker(parraCoords, { icon: parraLabelIcon }).addTo(map);
+
 
 
     // 1.7. Naikawado Rd. Premium Floating Labels
@@ -731,6 +1043,37 @@ export default function MapContainer({
 
     const roadLabelMarker1 = L.marker(roadLabelCoords1, { icon: roadLabelIcon }).addTo(map);
     const roadLabelMarker2 = L.marker(roadLabelCoords2, { icon: roadLabelIcon }).addTo(map);
+
+    // 1.7ab. St. Anne’s Church Road Premium Floating Label
+    const stAnnesRoadLabelCoords: [number, number] = [15.577797, 73.782382];
+    const stAnnesRoadLabelIcon = L.divIcon({
+      className: 'road-label-wrapper',
+      html: `
+        <div class="road-label-inner" style="
+          transform: translate(-50%, -50%);
+          display: inline-block;
+          white-space: nowrap;
+          background-color: #113225;
+          color: #FFFEF7;
+          font-family: 'Mulish', 'Inter', sans-serif;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3.5px 10px;
+          border-radius: 6px;
+          border: 1px solid #234D3B;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+          pointer-events: none;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        ">
+          St. Anne’s Church Road (Dear Zindagi Movie Road)
+        </div>
+      `,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+    L.marker(stAnnesRoadLabelCoords, { icon: stAnnesRoadLabelIcon }).addTo(map);
 
     // 1.7b. Anjuna – Mapusa Rd. Premium Floating Labels
     const anjunaMapusaCoords1: [number, number] = [15.597687, 73.781947];
