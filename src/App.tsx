@@ -603,13 +603,17 @@ export default function App() {
                             Oops! Please reach out to the admin.
                           </p>
                         </div>
-                      ) : (
+                      ) : imgSrc ? (
                         <img
                           src={imgSrc}
                           className="w-full h-full object-contain rounded-xl"
                           alt={activeVillaModal.mode === 'render' ? `${activeVillaModal.number} Render` : `Villa ${activeVillaModal.number} Floor Plan Layout`}
                           referrerPolicy="no-referrer"
                         />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full">
+                          <div className="w-8 h-8 rounded-full border-2 border-[#BF9861]/20 border-t-[#BF9861] animate-spin"></div>
+                        </div>
                       )}
                     </div>
 

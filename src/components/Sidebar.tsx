@@ -679,7 +679,7 @@ export default function Sidebar({
                       Oops! Please reach out to the admin.
                     </p>
                   </div>
-                ) : (
+                ) : lightboxImage.url ? (
                   <img 
                     src={lightboxImage.url} 
                     alt={lightboxImage.title}
@@ -687,7 +687,7 @@ export default function Sidebar({
                     referrerPolicy="no-referrer"
                     onError={() => setRenderImgErr(true)}
                   />
-                )}
+                ) : null}
               </div>
               <div className="p-6 md:w-2/5 flex flex-col justify-between bg-white text-[#302F2C]">
                 <div className="space-y-4">
