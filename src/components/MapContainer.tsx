@@ -1051,8 +1051,11 @@ export default function MapContainer({
       html: `
         <div class="road-label-inner" style="
           transform: translate(-50%, -50%);
-          display: inline-block;
-          white-space: nowrap;
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
           background-color: #113225;
           color: #FFFEF7;
           font-family: 'Mulish', 'Inter', sans-serif;
@@ -1060,20 +1063,22 @@ export default function MapContainer({
           font-weight: 800;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          padding: 3.5px 10px;
+          padding: 6px 12px;
           border-radius: 6px;
           border: 1px solid #234D3B;
           box-shadow: 0 3px 8px rgba(0,0,0,0.35);
           pointer-events: none;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          line-height: 1.3;
         ">
-          St. Anne’s Church Road (Dear Zindagi Movie Road)
+          <span style="white-space: nowrap;">St. Anne’s Church Road</span>
+          <span style="white-space: nowrap; margin-top: 1px;">(Dear Zindagi Movie Road)</span>
         </div>
       `,
       iconSize: [0, 0],
       iconAnchor: [0, 0]
     });
-    L.marker(stAnnesRoadLabelCoords, { icon: stAnnesRoadLabelIcon }).addTo(map);
+    const stAnnesRoadLabelMarker = L.marker(stAnnesRoadLabelCoords, { icon: stAnnesRoadLabelIcon }).addTo(map);
 
     // 1.7b. Anjuna – Mapusa Rd. Premium Floating Labels
     const anjunaMapusaCoords1: [number, number] = [15.597687, 73.781947];
@@ -1223,7 +1228,13 @@ export default function MapContainer({
     });
 
     const matchLabelToZoom = () => {
-      const markers = [roadLabelMarker1, roadLabelMarker2];
+      const markers = [
+        roadLabelMarker1,
+        roadLabelMarker2,
+        stAnnesRoadLabelMarker,
+        anjunaMapusaMarker1,
+        anjunaMapusaMarker2
+      ].filter(Boolean);
       const currentZoom = map.getZoom();
 
       markers.forEach(marker => {
@@ -1232,31 +1243,42 @@ export default function MapContainer({
         const inner = el.querySelector('.road-label-inner') as HTMLElement;
         if (!inner) return;
 
+        const isStAnnes = inner.innerHTML.includes('Dear Zindagi');
+
         if (currentZoom <= 14) {
-          inner.style.fontSize = '6.5px';
-          inner.style.padding = '1px 3px';
-          inner.style.borderRadius = '3px';
+          inner.style.fontSize = isStAnnes ? '4px' : '6.5px';
+          inner.style.padding = isStAnnes ? '1.5px 3px' : '1px 3px';
+          inner.style.borderRadius = '3.5px';
           inner.style.borderWidth = '0.5px';
           inner.style.letterSpacing = '0.04em';
+          // Hide completely at very low zoom levels to prevent any map clutter
+          if (currentZoom <= 13) {
+            inner.style.display = 'none';
+          } else {
+            inner.style.display = 'inline-flex';
+          }
         } else if (currentZoom === 15) {
-          inner.style.fontSize = '7px';
-          inner.style.padding = '2px 5px';
-          inner.style.borderRadius = '4px';
+          inner.style.fontSize = isStAnnes ? '5.5px' : '7px';
+          inner.style.padding = isStAnnes ? '2.5px 5px' : '2px 5px';
+          inner.style.borderRadius = '4.5px';
           inner.style.borderWidth = '0.75px';
           inner.style.letterSpacing = '0.06em';
+          inner.style.display = 'inline-flex';
         } else if (currentZoom === 16) {
-          inner.style.fontSize = '8px';
-          inner.style.padding = '3px 7px';
-          inner.style.borderRadius = '5px';
+          inner.style.fontSize = isStAnnes ? '6.5px' : '8px';
+          inner.style.padding = isStAnnes ? '3.5px 7px' : '3px 7px';
+          inner.style.borderRadius = '5.5px';
           inner.style.borderWidth = '1px';
           inner.style.letterSpacing = '0.08em';
+          inner.style.display = 'inline-flex';
         } else {
           // Zoom 17 and above
-          inner.style.fontSize = '9px';
-          inner.style.padding = '4px 10px';
+          inner.style.fontSize = isStAnnes ? '7.5px' : '9px';
+          inner.style.padding = isStAnnes ? '5px 10px' : '4px 10px';
           inner.style.borderRadius = '6px';
           inner.style.borderWidth = '1.2px';
           inner.style.letterSpacing = '0.08em';
+          inner.style.display = 'inline-flex';
         }
       });
 
