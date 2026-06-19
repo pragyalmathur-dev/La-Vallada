@@ -526,6 +526,32 @@ export default function MapContainer({
       offset: L.point(0, -28)
     });
 
+    // Villa Da Fiore Vianaar Project
+    const villaDaFioreCoords: [number, number] = [15.572389, 73.781456];
+    const villaDaFioreMarker = L.marker(villaDaFioreCoords, { icon: vianaarProjectIcon }).addTo(map);
+    const villaDaFioreTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          Villa Da Fiore
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROJECT
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          this is a standalone manor
+        </div>
+      </div>
+    `;
+    villaDaFioreMarker.bindTooltip(villaDaFioreTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'villa-da-fiore-tooltip',
+      offset: L.point(0, -28)
+    });
+
     // St. Anne’s Church Pin & Tooltip
     const churchCoords: [number, number] = [15.578886, 73.779575];
     const { distanceStr: churchDistance, driveTimeStr: churchDrive } = calculateDistanceAndDriveTime(churchCoords);
