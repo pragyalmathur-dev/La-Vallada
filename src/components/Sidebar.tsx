@@ -11,7 +11,6 @@ import {
   Compass, 
   Maximize2, 
   Layers, 
-  Eye, 
   Building2
 } from 'lucide-react';
 import { Unit } from '../types';
@@ -578,61 +577,6 @@ export default function Sidebar({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-
-            {/* SECTION 2: RENDERS */}
-            <div className="space-y-3.5">
-              <div className="flex items-center gap-2">
-                <Eye size={16} className="text-[#BF9861]" />
-                <h3 className="text-[13.5px] font-serif font-extrabold uppercase tracking-[0.18em] text-[#234D3B]">
-                  Renders
-                </h3>
-              </div>
-
-              {/* Grid of 3 buttons in a single line */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  id="btn-render-3bhk-villas"
-                  onClick={() => handleItemSelect('renders', '3bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
-                    activeCategory === 'renders' && activeItem === '3bhk-villas'
-                      ? 'bg-[#234D3B] border-[#234D3B] text-white'
-                      : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
-                  }`}
-                >
-                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">3 BHK</span>
-                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Villas</span>
-                </button>
-
-                <button
-                  type="button"
-                  id="btn-render-2bhk-villas"
-                  onClick={() => handleItemSelect('renders', '2bhk-villas')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
-                    activeCategory === 'renders' && activeItem === '2bhk-villas'
-                      ? 'bg-[#234D3B] border-[#234D3B] text-white'
-                      : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
-                  }`}
-                >
-                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">2 BHK</span>
-                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Villas</span>
-                </button>
-
-                <button
-                  type="button"
-                  id="btn-render-2bhk-apts"
-                  onClick={() => handleItemSelect('renders', '2bhk-apts')}
-                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-center transition-all duration-300 shadow-sm cursor-pointer h-[80px] ${
-                    activeCategory === 'renders' && activeItem === '2bhk-apts'
-                      ? 'bg-[#234D3B] border-[#234D3B] text-white'
-                      : 'bg-[#FFFEF7]/40 border-[#BF9861]/20 text-[#302F2C] hover:border-[#BF9861]/60 hover:bg-[#FFFEF7]/80'
-                  }`}
-                >
-                  <span className="text-[10.5px] font-sans font-extrabold uppercase tracking-wide leading-tight">2 BHK</span>
-                  <span className="text-[9px] font-sans font-medium tracking-widest leading-none opacity-80">Apartments</span>
-                </button>
-              </div>
             </div>
 
           </div>
