@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import L from 'leaflet';
-import { Plus, Minus, CircleDot } from 'lucide-react';
+import { Plus, Minus, CircleDot, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import MapContainer from './components/MapContainer';
 import Sidebar from './components/Sidebar';
@@ -154,6 +154,8 @@ export default function App() {
   const [mapTile, setMapTile] = useState<'osm' | 'satellite' | 'topo'>('satellite');
   const [activeCategory, setActiveCategory] = useState<string>('Overview');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [activeMapFilter, setActiveMapFilter] = useState<string>('all');
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState<boolean>(false);
 
   // Villa/Apartment Floor Plan Modal states
   const [activeVillaModal, setActiveVillaModal] = useState<{ number: string; type: '2bhk-villas' | '3bhk-villas' | '2bhk-apts'; status: string; mode?: 'floorplan' | 'render' } | null>(null);
@@ -408,10 +410,75 @@ export default function App() {
           mapRef={mapRef}
           overlayRef={overlayRef}
           sidebarOpen={sidebarOpen}
+          activeMapFilter={activeMapFilter}
         />
 
         {/* MAP NAVIGATION CONTROLS */}
         <div id="map-navigation-controls" className="absolute bottom-8 right-8 z-[900] flex flex-col gap-3">
+          {/* MAP FILTER CONTROL */}
+          <div className="relative">
+            <button
+              type="button"
+              id="map-filter-button"
+              onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+              className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-2xl cursor-pointer transition-all duration-300 ${
+                filterDropdownOpen || activeMapFilter !== 'all'
+                  ? 'bg-[#BF9861] text-[#234D3B] border-[#BF9861]'
+                  : 'bg-[#234D3B]/95 backdrop-blur-md border-[#BF9861]/40 text-[#FFFEF7] hover:bg-[#BF9861] hover:text-[#234D3B] hover:border-[#BF9861]/80'
+              }`}
+              title="Filter Map Pins"
+            >
+              <Filter size={20} strokeWidth={2.5} />
+            </button>
+
+            {filterDropdownOpen && (
+              <div id="map-filter-dropdown" className="absolute right-16 bottom-0 z-[1000] flex flex-col bg-[#234D3B]/95 backdrop-blur-md border border-[#BF9861]/40 rounded-xl shadow-2xl overflow-hidden min-w-[230px] p-1.5 animate-in fade-in slide-in-from-right-2 duration-250">
+                <div className="px-3 py-2 border-b border-[#BF9861]/20 mb-1">
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#BF9861]">
+                    Filter Locations
+                  </span>
+                </div>
+                
+                {[
+                  { id: 'all', label: 'Show All Pins', color: '#BF9861', isAll: true },
+                  { id: 'vianaar', label: 'Vianaar Properties', color: '#234D3B' },
+                  { id: 'education', label: 'Education Institutions', color: '#D4527B' },
+                  { id: 'clothing', label: 'Clothing Stores', color: '#0F766E' },
+                  { id: 'f&b', label: 'Restaurants & Cafés', color: '#EA580C' }
+                ].map(item => {
+                  const isActive = activeMapFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveMapFilter(item.id);
+                        setFilterDropdownOpen(false);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer w-full ${
+                        isActive
+                          ? 'bg-[#BF9861] text-[#234D3B]'
+                          : 'text-[#FFFEF7] hover:bg-white/10 hover:text-[#BF9861]'
+                      }`}
+                    >
+                      {item.isAll ? (
+                        <div className="w-2.5 h-2.5 rounded-full border border-current flex items-center justify-center">
+                          <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-[#234D3B]' : 'bg-[#BF9861]'}`} />
+                        </div>
+                      ) : (
+                        <div
+                          className="w-2.5 h-2.5 rounded-full border border-white/20"
+                          style={{ backgroundColor: item.color }}
+                        />
+                      )}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => mapRef.current?.zoomIn()}

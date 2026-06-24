@@ -18,6 +18,7 @@ interface MapContainerProps {
   mapRef: React.MutableRefObject<L.Map | null>;
   overlayRef: React.MutableRefObject<L.ImageOverlay | null>;
   sidebarOpen: boolean;
+  activeMapFilter: string;
 }
 
 // Tile configurations
@@ -37,7 +38,7 @@ interface CustomPOI {
   id: string;
   name: string;
   coordinate: [number, number];
-  category: 'f&b' | 'education' | 'tourism' | 'other';
+  category: 'f&b' | 'education' | 'tourism' | 'clothing' | 'other';
 }
 
 const CUSTOM_POI_CATEGORIES = {
@@ -72,6 +73,16 @@ const CUSTOM_POI_CATEGORIES = {
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#FFFEF7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
         <polygon points="16.2,7.8 14.2,13.4 8.6,15.4 10.6,9.8" fill="#FFFEF7" fill-opacity="0.25"/>
+      </svg>
+    `
+  },
+  'clothing': {
+    color: '#0F766E', // Stylish Deep Teal for Luxury Boutiques/Clothing
+    borderColor: '#FFFEF7',
+    label: 'Clothing & Boutique',
+    iconHtml: `
+      <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#FFFEF7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
       </svg>
     `
   },
@@ -159,6 +170,120 @@ const CUSTOM_POIS: CustomPOI[] = [
     name: 'La Cucina - Italian Restaurant',
     coordinate: [15.589938, 73.765522],
     category: 'f&b'
+  },
+  {
+    id: 'poi-avos-kitchen',
+    name: "Avo's Kitchen",
+    coordinate: [15.597311, 73.788395],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-gunpowder',
+    name: 'Gunpowder',
+    coordinate: [15.597112, 73.788391],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-izumi',
+    name: 'Izumi',
+    coordinate: [15.597431, 73.786998],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-suzies',
+    name: "Suzie's",
+    coordinate: [15.594426, 73.775119],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-the-assa-house',
+    name: 'The Assa House',
+    coordinate: [15.601071, 73.784088],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-coffee-culture',
+    name: 'Coffee Culture',
+    coordinate: [15.600599, 73.764534],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-tamil-table',
+    name: 'Tamil Table',
+    coordinate: [15.598799, 73.774343],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-g-shot-coffee',
+    name: 'G Shot Coffee Roastery & Cafe',
+    coordinate: [15.598493, 73.772090],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-neighbors',
+    name: 'Neighbors',
+    coordinate: [15.600942, 73.779960],
+    category: 'f&b'
+  },
+  {
+    id: 'poi-no-nasties',
+    name: 'No Nasties Clothing',
+    coordinate: [15.597286, 73.787703],
+    category: 'clothing'
+  },
+  {
+    id: 'poi-rangeela',
+    name: 'Rangeela',
+    coordinate: [15.598978, 73.778914],
+    category: 'clothing'
+  },
+  {
+    id: 'poi-nicobar',
+    name: 'Nicobar Design Studio',
+    coordinate: [15.593521, 73.775908],
+    category: 'clothing'
+  },
+  {
+    id: 'poi-the-flame-store',
+    name: 'The Flame Store',
+    coordinate: [15.597192, 73.785900],
+    category: 'clothing'
+  },
+  {
+    id: 'poi-paper-boat-collective',
+    name: 'Paper Boat Collective',
+    coordinate: [15.543469, 73.812332],
+    category: 'clothing'
+  },
+  {
+    id: 'poi-assagao-union',
+    name: 'Assagao Union High School',
+    coordinate: [15.596376, 73.779174],
+    category: 'education'
+  },
+  {
+    id: 'poi-kushe',
+    name: 'Kushe Higher Secondary School',
+    coordinate: [15.596040, 73.797501],
+    category: 'education'
+  },
+  {
+    id: 'poi-joedells',
+    name: 'Joedells Primary School',
+    coordinate: [15.592926, 73.798167],
+    category: 'education'
+  },
+  {
+    id: 'poi-agnel',
+    name: 'Agnel Institute of Engineering & Management',
+    coordinate: [15.595259, 73.795112],
+    category: 'education'
+  },
+  {
+    id: 'poi-sacred-heart',
+    name: 'Sacred Heart High School',
+    coordinate: [15.582449, 73.796104],
+    category: 'education'
   }
 ];
 
@@ -203,7 +328,8 @@ export default function MapContainer({
   mapTile,
   mapRef,
   overlayRef,
-  sidebarOpen
+  sidebarOpen,
+  activeMapFilter
 }: MapContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentTileLayerRef = useRef<L.TileLayer | null>(null);
@@ -212,6 +338,10 @@ export default function MapContainer({
   const markersGroupRef = useRef<L.LayerGroup | null>(null);
   const nearbyMarkersGroupRef = useRef<L.LayerGroup | null>(null);
   const projectMarkerRef = useRef<L.Marker | null>(null);
+
+  const vianaarMarkersRef = useRef<L.Marker[]>([]);
+  const customPoiMarkersRef = useRef<{ marker: L.Marker; category: string }[]>([]);
+  const churchMarkerRef = useRef<L.Marker | null>(null);
 
   // Core coordinates
   const PROJECT_LAT = 15.58885;
@@ -336,7 +466,7 @@ export default function MapContainer({
       iconAnchor: [12, 28]
     });
 
-    const elRocioCoords: [number, number] = [15.593123, 73.775048];
+    const elRocioCoords: [number, number] = [15.593488, 73.775195];
     const elRocioMarker = L.marker(elRocioCoords, { icon: elRocioIcon }).addTo(map);
 
     const elRocioTooltipHtml = `
@@ -552,6 +682,32 @@ export default function MapContainer({
       offset: L.point(0, -28)
     });
 
+    // La Morella Vianaar Project
+    const laMorellaCoords: [number, number] = [15.601762, 73.783868];
+    const laMorellaMarker = L.marker(laMorellaCoords, { icon: vianaarProjectIcon }).addTo(map);
+    const laMorellaTooltipHtml = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Mulish', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: #234D3B; text-transform: uppercase; line-height: 1.1;">
+          La Morella
+        </div>
+        <div style="font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: #AA783B; margin-top: 4px; text-transform: uppercase; line-height: 1.1;">
+          VIANAAR PROJECT
+        </div>
+        <div style="width: 100%; border-top: 1px solid rgba(191, 152, 97, 0.3); margin: 6px 0;"></div>
+        <div style="font-size: 9px; font-style: italic; font-family: 'Cardo', serif; color: rgba(48, 47, 44, 0.8); text-transform: lowercase; line-height: 1.1;">
+          luxury 4 bhk villas
+        </div>
+      </div>
+    `;
+    laMorellaMarker.bindTooltip(laMorellaTooltipHtml, {
+      direction: 'top',
+      permanent: false,
+      sticky: true,
+      opacity: 1.0,
+      className: 'la-morella-tooltip',
+      offset: L.point(0, -28)
+    });
+
     // St. Anne’s Church Pin & Tooltip
     const churchCoords: [number, number] = [15.578886, 73.779575];
     const { distanceStr: churchDistance, driveTimeStr: churchDrive } = calculateDistanceAndDriveTime(churchCoords);
@@ -598,6 +754,18 @@ export default function MapContainer({
     });
 
     const churchMarker = L.marker(churchCoords, { icon: churchIcon }).addTo(map);
+    churchMarkerRef.current = churchMarker;
+
+    vianaarMarkersRef.current = [
+      laMeridaMarker,
+      elRocioMarker,
+      laZacaraMarker,
+      laCoveloMarker,
+      elRasoMarker,
+      laRozaliaMarker,
+      villaDaFioreMarker,
+      laMorellaMarker
+    ];
 
     const churchTooltipHtml = `
       <div class="custom-poi-label-inner" style="
@@ -869,8 +1037,30 @@ export default function MapContainer({
 
     // 1.6ca. Anjuna – Mapusa Rd. Curved Polyline (Solid White Line)
     const anjunaMapusaRoadCoordinates: [number, number][] = [
-      [15.597623, 73.782292],
-      [15.597706, 73.781445],
+      [15.596645, 73.799166],
+      [15.595701, 73.798716],
+      [15.595240, 73.797848],
+      [15.595325, 73.795438],
+      [15.595601, 73.794554],
+      [15.595693, 73.794434],
+      [15.596632, 73.793309],
+      [15.596683, 73.793196],
+      [15.596726, 73.792982],
+      [15.596830, 73.792278],
+      [15.596968, 73.791930],
+      [15.597167, 73.791354],
+      [15.597141, 73.790583],
+      [15.597162, 73.789065],
+      [15.597234, 73.788138],
+      [15.597243, 73.787875],
+      [15.597174, 73.787045],
+      [15.597094, 73.786155],
+      [15.597189, 73.783755],
+      [15.597231, 73.783580],
+      [15.597513, 73.782835],
+      [15.597675, 73.782118],
+      [15.597716, 73.781730],
+      [15.597677, 73.781398],
       [15.597541, 73.780909],
       [15.596570, 73.779675],
       [15.596156, 73.779203],
@@ -926,6 +1116,145 @@ export default function MapContainer({
       opacity: 1.0,
       lineCap: 'round',
       lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6cb2. Additional Road Curved Polyline (Solid White Line)
+    const additionalRoadCoordinates: [number, number][] = [
+      [15.587381, 73.772491],
+      [15.588610, 73.772016],
+      [15.589098, 73.771928],
+      [15.589875, 73.771885],
+      [15.590926, 73.771917],
+      [15.593374, 73.771994],
+      [15.595292, 73.772433],
+      [15.598572, 73.772745],
+      [15.599146, 73.772767],
+      [15.599264, 73.774063],
+      [15.599415, 73.774907],
+      [15.599648, 73.777671],
+      [15.599840, 73.778356],
+      [15.600470, 73.779301],
+      [15.600863, 73.779938],
+      [15.601230, 73.780640],
+      [15.601347, 73.781833],
+      [15.601267, 73.782378],
+      [15.601241, 73.783119],
+      [15.601262, 73.783113],
+      [15.600901, 73.784414],
+      [15.600828, 73.784910],
+      [15.600522, 73.785908],
+      [15.600438, 73.786304],
+      [15.600460, 73.786539],
+      [15.600669, 73.787254],
+      [15.600726, 73.787630],
+      [15.600748, 73.788128],
+      [15.600913, 73.789620],
+      [15.601123, 73.790864],
+      [15.601293, 73.791992],
+      [15.601416, 73.793094]
+    ];
+
+    // Casing (outline) for Additional Road
+    L.polyline(additionalRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Crisp white road overlay for Additional Road
+    L.polyline(additionalRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6cb2c. Western Connecting Road Curved Polyline (Solid White Line)
+    const westernRoadCoordinates: [number, number][] = [
+      [15.599130, 73.772758],
+      [15.599254, 73.770705],
+      [15.599480, 73.769133],
+      [15.599596, 73.768579],
+      [15.599987, 73.766273],
+      [15.600671, 73.764026],
+      [15.600704, 73.763829],
+      [15.601088, 73.761512]
+    ];
+
+    // Casing (outline) for Western Connecting Road
+    L.polyline(westernRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Crisp white road overlay for Western Connecting Road
+    L.polyline(westernRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // 1.6cb3. Suzie's Lane Dotted Road (Dotted White Line)
+    const suziesLaneRoadCoordinates: [number, number][] = [
+      [15.594720, 73.774931],
+      [15.593940, 73.775225],
+      [15.593404, 73.775469],
+      [15.592833, 73.775764]
+    ];
+
+    // Casing (outline) for Suzie's Lane Dotted Road
+    L.polyline(suziesLaneRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round',
+      dashArray: '4, 8'
+    }).addTo(map);
+
+    // Dotted white road overlay for Suzie's Lane
+    L.polyline(suziesLaneRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round',
+      dashArray: '4, 8'
+    }).addTo(map);
+
+    // 1.6cb4. Eastern Dotted Road (Dotted White Line)
+    const easternDottedRoadCoordinates: [number, number][] = [
+      [15.595330, 73.797281],
+      [15.595470, 73.797235],
+      [15.597603, 73.797873]
+    ];
+
+    // Casing (outline) for Eastern Dotted Road
+    L.polyline(easternDottedRoadCoordinates, {
+      color: '#143024',
+      weight: 6.5,
+      opacity: 0.5,
+      lineCap: 'round',
+      lineJoin: 'round',
+      dashArray: '4, 8'
+    }).addTo(map);
+
+    // Dotted white road overlay for Eastern Dotted Road
+    L.polyline(easternDottedRoadCoordinates, {
+      color: '#FFFFFF',
+      weight: 3.5,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round',
+      dashArray: '4, 8'
     }).addTo(map);
 
     // 1.6d. Anjuna Geographic Label (Always shown, no location pin, clean typography)
@@ -1144,6 +1473,38 @@ export default function MapContainer({
     const anjunaMapusaMarker1 = L.marker(anjunaMapusaCoords1, { icon: anjunaMapusaLabelIcon }).addTo(map);
     const anjunaMapusaMarker2 = L.marker(anjunaMapusaCoords2, { icon: anjunaMapusaLabelIcon }).addTo(map);
 
+    // 1.7ac. Suzie's Lane Premium Floating Label
+    const suziesLaneRoadLabelCoords: [number, number] = [15.593915, 73.775250];
+    const suziesLaneRoadLabelIcon = L.divIcon({
+      className: 'road-label-wrapper',
+      html: `
+        <div class="road-label-inner" style="
+          transform: translate(-50%, -50%);
+          display: inline-block;
+          white-space: nowrap;
+          background-color: #113225;
+          color: #FFFEF7;
+          font-family: 'Mulish', 'Inter', sans-serif;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 6px;
+          border: 1px solid #234D3B;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+          pointer-events: none;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        ">
+          Suzie's Lane
+        </div>
+      `,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+
+    const suziesLaneRoadLabelMarker = L.marker(suziesLaneRoadLabelCoords, { icon: suziesLaneRoadLabelIcon }).addTo(map);
+
     // 1.8. Custom Dynamic Categorized Pins (Restaurants/Bar/Cafe, Education, Tourist Places, and Others)
     const customPoiMarkers: { marker: L.Marker; category: string }[] = [];
 
@@ -1256,13 +1617,16 @@ export default function MapContainer({
       customPoiMarkers.push({ marker, category: poi.category });
     });
 
+    customPoiMarkersRef.current = customPoiMarkers;
+
     const matchLabelToZoom = () => {
       const markers = [
         roadLabelMarker1,
         roadLabelMarker2,
         stAnnesRoadLabelMarker,
         anjunaMapusaMarker1,
-        anjunaMapusaMarker2
+        anjunaMapusaMarker2,
+        suziesLaneRoadLabelMarker
       ].filter(Boolean);
       const currentZoom = map.getZoom();
 
@@ -1657,6 +2021,43 @@ export default function MapContainer({
     overlayConfig.opacity, 
     overlayConfig.visible
   ]);
+
+  // 6b. Reactive map marker filtering based on activeMapFilter
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // A helper to safely add or remove layers
+    const setLayerVisibility = (layer: L.Layer, visible: boolean) => {
+      if (visible) {
+        if (!map.hasLayer(layer)) {
+          map.addLayer(layer);
+        }
+      } else {
+        if (map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      }
+    };
+
+    // Filter Vianaar pins
+    const showVianaar = activeMapFilter === 'all' || activeMapFilter === 'vianaar';
+    vianaarMarkersRef.current.forEach(marker => {
+      setLayerVisibility(marker, showVianaar);
+    });
+
+    // Filter Custom POI pins
+    customPoiMarkersRef.current.forEach(({ marker, category }) => {
+      const showPoi = activeMapFilter === 'all' || activeMapFilter === category;
+      setLayerVisibility(marker, showPoi);
+    });
+
+    // Filter St. Anne's Church landmark
+    if (churchMarkerRef.current) {
+      const showChurch = activeMapFilter === 'all' || activeMapFilter === 'tourism';
+      setLayerVisibility(churchMarkerRef.current, showChurch);
+    }
+  }, [activeMapFilter]);
 
   // 7. Handle Sidebar toggle resizing
   useEffect(() => {
