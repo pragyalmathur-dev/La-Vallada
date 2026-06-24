@@ -202,20 +202,19 @@ export default function App() {
   }, [isGroundFloor, withDimension, activeVillaModal?.number, activeVillaModal?.type]);
 
   // Ground position for site plan overlay config
-  const DEFAULT_LAT = 15.588768;
-  const DEFAULT_LNG = 73.786116;
+  const DEFAULT_LAT = 15.588735000000002;
+  const DEFAULT_LNG = 73.78617100000011;
 
   const [overlayConfig, setOverlayConfig] = useState<OverlayConfig>({
     lat: DEFAULT_LAT,
     lng: DEFAULT_LNG,
-    scale: 0.9749,
-    widthScale: 1.3000,
-    heightScale: 1.0000,
-    rotation: -2.75,
+    scale: 0.59,
+    widthScale: 1.3,
+    heightScale: 1,
+    rotation: -2.850000000000005,
     opacity: 1.00,
     visible: true
   });
-
   // ─── REFS FOR MAP ACCESS ───
   const mapRef = useRef<L.Map | null>(null);
   const overlayRef = useRef<L.ImageOverlay | null>(null);
@@ -435,7 +434,7 @@ export default function App() {
             type="button"
             onClick={() => {
               if (mapRef.current) {
-                mapRef.current.setView([DEFAULT_LAT, DEFAULT_LNG], 17, { animate: true });
+                mapRef.current.setView([overlayConfig.lat, overlayConfig.lng], 17, { animate: true });
               }
             }}
             className="w-12 h-12 rounded-xl bg-[#234D3B]/95 backdrop-blur-md border border-[#BF9861]/40 text-[#FFFEF7] flex items-center justify-center hover:bg-[#BF9861] hover:text-[#234D3B] hover:border-[#BF9861]/80 shadow-2xl cursor-pointer transition-all duration-300"

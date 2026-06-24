@@ -662,8 +662,11 @@ export default function MapContainer({
 
     // 1.6. Naikawado Rd. Curved Polyline (Solid White Line)
     const roadCoordinates: [number, number][] = [
-      [15.589402, 73.785265],
-      [15.589185, 73.784766],
+      [15.589451, 73.785458],
+      [15.589432, 73.785355],
+      [15.589397, 73.785177],
+      [15.589352, 73.785061],
+      [15.589172, 73.784698],
       [15.588896, 73.783948],
       [15.588823, 73.783511],
       [15.588782, 73.782886],
@@ -1576,15 +1579,34 @@ export default function MapContainer({
     // Compute bounding box coordinates based on scale, widthScale and heightScale
     // Base box around the target pin of about ~200 meters.
     // 0.001 degrees is approx ~110m.
+    const latRad = (overlayConfig.lat * Math.PI) / 180;
+    const cosLat = Math.cos(latRad);
+
     const baseLatSpan = 0.0015;
     const baseLngSpan = 0.002;
     const scaledLatSpan = baseLatSpan * overlayConfig.scale * (overlayConfig.heightScale ?? 1.0);
     const scaledLngSpan = baseLngSpan * overlayConfig.scale * (overlayConfig.widthScale ?? 1.0);
 
+    // To prevent any aspect ratio skewing when rotating inside the SVG, we make the SVG bounds
+    // a perfect square in pixel space on screen. We do this by applying a cos(lat) adjustment 
+    // to the latitude span.
+    const maxSpan = Math.max(scaledLatSpan, scaledLngSpan);
+    const lngSpan = maxSpan;
+    const latSpan = maxSpan * cosLat;
+
     const bounds: L.LatLngBoundsExpression = [
-      [overlayConfig.lat - scaledLatSpan, overlayConfig.lng - scaledLngSpan],
-      [overlayConfig.lat + scaledLatSpan, overlayConfig.lng + scaledLngSpan]
+      [overlayConfig.lat - latSpan, overlayConfig.lng - lngSpan],
+      [overlayConfig.lat + latSpan, overlayConfig.lng + lngSpan]
     ];
+
+    // Compute size of image relative to the square bounds
+    const imgWidthFraction = scaledLngSpan / maxSpan;
+    const imgHeightFraction = scaledLatSpan / maxSpan;
+
+    const svgWidth = 1000 * imgWidthFraction;
+    const svgHeight = 1000 * imgHeightFraction;
+    const svgX = 500 - (svgWidth / 2);
+    const svgY = 500 - (svgHeight / 2);
 
     // Create the SVG container element
     const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1596,16 +1618,16 @@ export default function MapContainer({
     // Create the image element inside the SVG
     const imgElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
     imgElement.setAttribute('href', '/assets/siteplan/site-plan.png');
-    imgElement.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '/assets/siteplan/site-plan.png');
-    imgElement.setAttribute('x', '0');
-    imgElement.setAttribute('y', '0');
-    imgElement.setAttribute('width', '1000');
-    imgElement.setAttribute('height', '1000');
+    imgElement.setAttribute('x', svgX.toString());
+    imgElement.setAttribute('y', svgY.toString());
+    imgElement.setAttribute('width', svgWidth.toString());
+    imgElement.setAttribute('height', svgHeight.toString());
+    imgElement.setAttribute('preserveAspectRatio', 'none');
     
     // Apply premium mix-blend-mode for seamless integration on street/satellite tiles
     imgElement.style.mixBlendMode = 'multiply';
     
-    // Rotate of -3 degrees around center of coordinate space (500,500)
+    // Rotate around center of coordinate space (500, 500)
     imgElement.setAttribute('transform', `rotate(${overlayConfig.rotation}, 500, 500)`);
 
     svgElement.appendChild(imgElement);
@@ -1616,7 +1638,7 @@ export default function MapContainer({
       interactive: false
     }).addTo(map);
 
-    overlayRef.current = overlay as any;
+    overlayRef.current = overlay;
 
     return () => {
       map.removeLayer(overlay);
